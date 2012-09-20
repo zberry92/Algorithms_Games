@@ -19,14 +19,17 @@ public:
 	code(int m, int n);
 	void createCode();
 	void checkCorrect();
+	void checkIncorrect(int guessedDigit);
+	const bool checkValue(int guess);
 	void printResult() const;
 	void makeGuess();
 
 private:
 	vector<int> correctDigits;
 	vector<int> guessedDigits;
+	vector<int> incorrectGuesses;
 	const int codeLength, maxDigitValue; 
-	int totalCorrect;
+	int totalCorrect, totalIncorrect;
 };
 
 code::code(int m, int n)
@@ -35,6 +38,9 @@ code::code(int m, int n)
 	/* Resize the two vectors holding the guessed digits and correct ones. */
 	correctDigits.resize(codeLength);
 	guessedDigits.resize(codeLength);
+
+	totalCorrect = 0;
+	totalIncorrect = 0;
 }
 
 void code::createCode()
@@ -45,7 +51,7 @@ void code::createCode()
 	for (int i = 0; i < codeLength; i ++)
 	{
 		/* Passing in maxDigitValue + 1 because random(m) returns digits 0 <= val <= m-1. */
-		correctDigits.at(i) = (int) rand.random(maxDigitValue + 1);   
+		correctDigits[i] = (int) rand.random(maxDigitValue + 1);   
 	}
 }
 
@@ -56,13 +62,47 @@ void code::checkCorrect()
 	/* Check to each entry of the correct code against the guessed code. */
 	for (int i = 0 ;  i < codeLength; i ++)
 	{
-		if (guessedDigits.at(i) == correctDigits.at(i))
+		if (guessedDigits[i] == correctDigits[i])
 		{
 			numCorrect++;
+		}
+		else
+		{
+			checkIncorrect(guessedDigits[i]);
 		}
 	}
 
 	totalCorrect = numCorrect;
+}
+
+void code::checkIncorrect(int guessedDigit)
+{
+	if (checkValue(guessedDigit))
+	{
+		for (int i = 0; i < codeLength; i++)
+		{
+			if (guessedDigit == correctDigits[i])
+			{
+				incorrectGuesses.resize(incorrectGuesses.size() + 1);
+				incorrectGuesses[incorrectGuesses.size() - 1] = guessedDigit;
+				totalIncorrect++;
+				break;
+			}
+		}
+	}
+}
+
+const bool code::checkValue(int guess)
+{
+	for (int i = 0; i < (int)incorrectGuesses.size(); i++)
+	{
+		if (guess = incorrectGuesses[i])
+		{
+			return false;
+		}
+	}
+
+	return true;
 }
 
 void code::printResult() const
@@ -74,7 +114,7 @@ void code::printResult() const
 		cout <<correctDigits.at(i) <<" ";
 	}
 
-	cout <<endl <<"The total number of digits you guessed correctly are: " <<totalCorrect <<endl;
+	cout <<endl <<"[" <<totalCorrect <<" | " <<totalIncorrect <<"]" <<endl;
 }
 
 void code::makeGuess()
