@@ -122,6 +122,27 @@ code::code()
 code::code(int m, int n)
 	:codeLength(n), maxDigitValue(m)
 {
+
+	/*Check to see if the function input is valid: */
+		try
+		{
+			if(maxDigitValue > 9 || maxDigitValue < 1)
+				//make sure that digits are within the specified range
+			{
+				throw rangeError();
+			}
+		}
+
+		catch(rangeError& re)
+		{ 
+			//catches an input error if the rangeError is thrown.
+			cout << "code::code(int, int) function input is not valid. Exiting..." << endl;
+			system("pause");
+			exit(0);
+
+		}
+
+
 	/* Resize the two vectors holding the guessed digits and correct ones. */
 	correctDigits.resize(codeLength);
 	guessedDigits.resize(codeLength);
@@ -146,13 +167,31 @@ void code::createCode()
 /* Has the user input a guess to the secret code. The user inputs each digit sequentially. */
 void code::makeGuess()
 {
-	cout <<"Please insert " <<codeLength <<" digits:" <<endl;	
+	cout <<"Please insert " <<codeLength <<" digits:" <<endl;
+	int checkInput;   //Temporary variable to check to see if the input is within bounds
 	
 	/* Have the user input the specified number of digits. */
 	for (int i = 0 ; i < codeLength; i++)
 	{
 		cout <<"Digit " <<(i + 1) <<": ";
-		cin >>guessedDigits[i];
+		cin >>checkInput;
+
+		    //Need to make sure the inputs to the function are 
+		try	//within the range of proper user defined numbers.
+		{
+			if(checkInput > maxDigitValue)  //Make sure that the number inputted  
+			{								//by the user is less than the maximum value allowed.
+				throw rangeError();
+			}
+		}
+		catch(rangeError & re)
+		{
+			cout<<"Inputed number is not within range. Exiting... " <<endl;
+			system("pause");  
+			exit(0);
+		}
+			
+		guessedDigits[i] = checkInput;
 	}
 
 }
@@ -255,8 +294,27 @@ int main()
 	cout <<"Please enter the length of your code: ";
 	cin >>length;
 
-	cout <<"Please enter the maximum digit you want in the code: ";
+
+
+	cout <<"Please enter the maximum digit (range 1:9) you want in the code: ";
 	cin >>maxDigit;
+
+	try
+	{
+		/* IF we are given a value that is out of range throw the exception. */
+		if(maxDigit > 9 || maxDigit < 0 || length < 0)
+		{
+			throw rangeError();
+		}
+		
+	}
+	catch(rangeError& re)
+	{ 
+		cout << "Number out of range. Exiting..." << endl;
+		system("pause");
+		return 0;
+
+	}
 
 	/* If a default value is entered then call the default constructor of mastermind */
 	if (length == 0 && maxDigit == 0)
@@ -266,9 +324,14 @@ int main()
 	}
 	else
 	{
-		mastermind ourGame(maxDigit, length);
-		ourGame.playGame();
+		
+			mastermind ourGame(maxDigit, length);
+			ourGame.playGame();
+		
+		
 	}
 
 	system("pause");
+
+	return 0;
 }
