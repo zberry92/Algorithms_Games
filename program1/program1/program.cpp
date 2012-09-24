@@ -1,6 +1,6 @@
 /*
  * Zachary Berry and Patrick Willett (BerWil)
- * Project 1a
+ * Project 1b
  * This project will simulate the game Mastermind. As of know it will ask the user for the length of the code
  * and the maximum number of digits. It will then have the user guess the code and print out the correct code
  * and the number of digits the user guessed correctly.
@@ -8,21 +8,26 @@
 
 #include <iostream>
 #include <vector>
-#include <stdlib.h>
 #include "d_random.h"
+#include "d_except.h"
 
 using namespace std;
 
+/* Maximum quesses the user is allowed. */
+const int max_guesses = 5;
+
+/* code class to handle the secret code and the guesses. */
 class code
 {
 public:
 	code(int m, int n);
 	void createCode();
+	void makeGuess();
 	void checkCorrect();
 	void checkIncorrect(int guessedDigit);
-	const bool checkValue(int guess);
-	void printResult() const;
-	void makeGuess();
+	bool checkValue(int guess) const;
+	bool printResult() const;
+	vector<int> getCode() const;
 
 private:
 	vector<int> correctDigits;
@@ -32,6 +37,68 @@ private:
 	int totalCorrect, totalIncorrect;
 };
 
+/* mastermind class to run the game */
+class mastermind
+{
+public:
+	mastermind();
+	mastermind(int m, int n);
+	void playGame();
+private:
+	code game;
+	const int length, maxDigit;
+};
+
+/* Global Functions - ostream operator overloading*/
+
+/* Overload to print vectors. */
+ostream &operator<< (ostream &out, const vector<int> vec)
+{
+	for (int i = 0; i < (int) vec.size(); i++)
+	{
+		cout <<vec[i] <<" ";
+	}
+	cout <<endl;
+	return out;
+}
+
+/* Overload to print the secret code from code objects. */
+ostream &operator<< (ostream &out, const code &myCode)
+{
+	cout <<myCode.getCode() <<endl;
+	return out;
+}
+
+/* Mastermind class functions */
+mastermind::mastermind()
+	:length(10), maxDigit(10), game(maxDigit, length)
+{
+}
+
+mastermind::mastermind(int m, int n)
+	:length(n), maxDigit(m), game(maxDigit, length)
+{
+}
+
+void mastermind::playGame()
+{
+	game.createCode();
+
+	cout <<"The secret code is: ";
+	cout <<game;
+
+	for (int i = 0; i < max_guesses; i++)
+	{
+		game.makeGuess();
+		game.checkCorrect();
+		if (game.printResult())
+		{
+			break;
+		}
+	}
+}
+
+/* Code class functions */
 code::code(int m, int n)
 	:codeLength(n), maxDigitValue(m)
 {
@@ -55,6 +122,19 @@ void code::createCode()
 	}
 }
 
+void code::makeGuess()
+{
+	cout <<"Please insert " <<codeLength <<" digits:" <<endl;	
+	
+	/* Have the user input the specified number of digits. */
+	for (int i = 0 ; i < codeLength; i++)
+	{
+		cout <<"Digit " <<(i + 1) <<": ";
+		cin >>guessedDigits[i];
+	}
+
+}
+
 void code::checkCorrect()
 {
 	int numCorrect = 0;
@@ -68,6 +148,7 @@ void code::checkCorrect()
 		}
 		else
 		{
+			/* Check to see if the incorrect digit is somewhere in the code. */
 			checkIncorrect(guessedDigits[i]);
 		}
 	}
@@ -77,8 +158,11 @@ void code::checkCorrect()
 
 void code::checkIncorrect(int guessedDigit)
 {
+	/* Check to see if the value has already been guess. */
 	if (checkValue(guessedDigit))
 	{
+		/* Check code for the incorrect digit, if there is a match then resize the incorrectGuesses vector, */
+		/* input the value and incrememnt the incorrect count. */
 		for (int i = 0; i < codeLength; i++)
 		{
 			if (guessedDigit == correctDigits[i])
@@ -92,11 +176,11 @@ void code::checkIncorrect(int guessedDigit)
 	}
 }
 
-const bool code::checkValue(int guess)
+bool code::checkValue(int guess) const
 {
 	for (int i = 0; i < (int)incorrectGuesses.size(); i++)
 	{
-		if (guess = incorrectGuesses[i])
+		if (guess == incorrectGuesses[i])
 		{
 			return false;
 		}
@@ -105,52 +189,49 @@ const bool code::checkValue(int guess)
 	return true;
 }
 
-void code::printResult() const
+bool code::printResult() const
 {
-	/* Print the correct code. */
-	cout <<"The correct code is: ";
-	for (int i = 0; i < codeLength; i++)
-	{
-		cout <<correctDigits.at(i) <<" ";
-	}
+	cout <<endl <<"Your results are [Correctly guessed | correct but in the wrong place]: " <<endl
+		 <<"[" <<totalCorrect <<" | " <<totalIncorrect <<"]" <<endl;
 
-	cout <<endl <<"[" <<totalCorrect <<" | " <<totalIncorrect <<"]" <<endl;
+	if (totalCorrect == codeLength)
+	{
+		cout <<"Congratulations! You guessed the code correctly!" <<endl;
+		return true;
+	}
+	else
+	{
+		cout <<"You did not answer correctly!!!" <<endl;
+		return false;
+	}
 }
 
-void code::makeGuess()
+vector<int> code::getCode() const
 {
-	cout <<"Please insert " <<codeLength <<" digits:" <<endl;	
-	
-	/* Have the user input the specified number of digits. */
-	for (int i = 0 ; i < codeLength; i++)
-	{
-		cout <<"Digit " <<(i + 1) <<": ";
-		cin >>guessedDigits.at(i);
-	}
-
+	return correctDigits;
 }
 
 int main()
 {
-	int length, maxDigit;
+	int length = 0, maxDigit = 0;
 
-	cout <<"Welcome to Mastermind V1.0." <<endl <<"Please enter the length of your code: ";
+	cout <<"Welcome to Mastermind V2.0." <<endl <<"If you want to customize the length and maximum digit of your code,"
+		 <<endl <<"enter numbers when prompted, if you want to use the default (10), just enter '0'." <<endl;
+	
+	cout <<"Please enter the length of your code: ";
 	cin >>length;
 
 	cout <<"Please enter the maximum digit you want in the code: ";
 	cin >>maxDigit;
 
-	/* Run three trials with the desired code length and maximum digit. */
-	for (int i = 1; i < 4; i++)
+	if (length == 0 && maxDigit == 0)
 	{
-		code tempCode(maxDigit, length);
-		cout <<"Trial " <<i <<", ";
-		
-		tempCode.createCode();
-		tempCode.makeGuess();
-		tempCode.checkCorrect();
-		tempCode.printResult();
+		mastermind outGame();
 	}
+
+	mastermind ourGame(maxDigit, length);
+
+	ourGame.playGame();
 
 	system("pause");
 }
