@@ -37,13 +37,11 @@ class deck
 {
 public:
 	deck();
-	~deck();
 	friend ostream& operator<< (ostream& ostr, deck& tempDeck);
 	void makeDeck();
 
 private:
 	node<card> *front;
-	node<card> *last;
 };
 
 // Overloaded operator to print the value and suit of the card object.
@@ -117,13 +115,6 @@ deck::deck()
 	makeDeck();
 }
 
-// deck destructor
-deck::~deck()
-{
-	delete front;
-	delete last;
-}
-
 // makeDeck() function will make a deck of 52 cards from 2 - Ace of each suit. Makes use of the node class. 
 // The card object is made into a node via the template class and is constructed into a linked list.
 void deck::makeDeck()
@@ -146,11 +137,6 @@ void deck::makeDeck()
 			{
 				curr->next = new node<card>;
 				curr = curr->next;
-			}
-			// When we have reached the end of our cards set our last pointer to the end of the deck.
-			else
-			{
-				last = curr;
 			}
 		}
 	}
