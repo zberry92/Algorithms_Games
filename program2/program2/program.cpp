@@ -6,6 +6,7 @@
 #include <iostream>
 #include "d_except.h"
 #include "d_node.h"
+#include "d_random.h"
 
 using namespace std;
 
@@ -20,7 +21,9 @@ class card
 {
 public:
 	card();
+	card(const card &card);
 	card(const int value, const int suit);
+	card& operator= (const card &rhs);
 	const int getValue() {return cardValue;};
 	const int getSuit() {return cardSuit;};
 	void setValue(const int value);
@@ -37,11 +40,18 @@ class deck
 {
 public:
 	deck();
+	~deck();
 	friend ostream& operator<< (ostream& ostr, deck& tempDeck);
 	void makeDeck();
+	card& dealCard();
+	void replaceCard(const card tempCard);
+	void shuffleDeck();
 
 private:
 	node<card> *front;
+	node<card> *last;
+	int deckSize;
+	randomNumber rand;
 };
 
 // Overloaded operator to print the value and suit of the card object.
@@ -109,10 +119,115 @@ ostream& operator<< (ostream& ostr, deck& tempDeck)
 	return ostr;
 }
 
+
+
+int newScore(int score, card c)
+{
+	/*
+	To take a card, the player turns over the top card on the deck and
+	(a) receives 10 points for an ace,
+	(b) receives 5 points for a king, queen or jack,
+	(c) receives 0 points for an 8, 9 or 10,
+	(d) loses half their points for a 7,
+	(e) loses all their points for a 2, 3, 4, 5 or 6, and
+	(f) receives 1 point extra, in addition to the above, for a heart. */
+
+	int value = c.getValue();
+	int suit = c.getSuit();
+
+	if (value == 14)
+	{
+		//ace
+		score += 10;
+	}
+	else if (value > 10 && value < 14)
+	{
+		//King, queen, Jack
+		score += 5;
+	}
+	 
+	else if (value == 7)
+	{
+		score = score/2;  //half the score
+	}
+	else if (value >= 2 && value <= 6)
+	{
+		score = 0;
+	}
+
+	if(suit == HEART)
+	{
+		score++;
+	}
+	
+	return score;
+}
+
+void playFlip()
+{
+	int usrInput, score = 0;
+	deck myDeck;
+	card tempCard;
+
+	cout <<"Welcome to Flip! The point of the game is to end the game with the most points. \n"
+		 <<"You can keep taking cards until you decide to end the game. To take a card enter 1 below and 0 to end game. \n"
+		 <<"The point system is as follows: \n"
+		 <<"(a) receives 10 points for an ace, \n"
+		 <<"(b) receives 5 points for a king, queen or jack, \n"
+         <<"(c) receives 0 points for an 8, 9 or 10, \n"
+		 <<"(d) loses half their points for a 7, \n"
+		 <<"(e)	loses all their points for a 2, 3, 4, 5 or 6, and \n"
+		 <<"(f) receives 1 point extra, in addition to the above, for a heart. \n \n \n";
+
+	for (int i = 0; i < 1; i++)
+	{
+		myDeck.shuffleDeck();
+		cout <<i <<endl <<myDeck;
+	}
+
+	return;
+	while (true)
+	{
+		cout <<"Please enter choose whether you want to end the game of draw a card. (0 - end | 1 - draw): ";
+		cin >> usrInput;
+
+		if (usrInput == 0)
+		{
+			break;
+		}
+		else if (usrInput == 1)
+		{
+			tempCard = myDeck.dealCard();
+			cout <<tempCard <<endl;
+			score = newScore(score, tempCard);
+		}
+		else
+		{
+			//throw range
+		}
+
+		cout <<"score: " <<score <<endl;
+	}
+}
+
 // deck constructor
 deck::deck()
 {
+	deckSize = 0;
 	makeDeck();
+}
+
+//deck destructor
+deck::~deck()
+{
+	node<card> *curr;
+
+	while (front != NULL)
+	{
+		curr = front;
+		front = front->next;
+		delete curr;
+	}
 }
 
 // makeDeck() function will make a deck of 52 cards from 2 - Ace of each suit. Makes use of the node class. 
@@ -137,8 +252,80 @@ void deck::makeDeck()
 			{
 				curr->next = new node<card>;
 				curr = curr->next;
+				deckSize++;
+			}
+			else
+			{
+				cout <<deckSize <<endl;
+				last = curr;
 			}
 		}
+	}
+}
+
+// dealCard() function will deal a card off the top of the deck and remove that card from the deck
+card& deck::dealCard()
+{
+	node<card> *curr;
+
+	if (deckSize == 0)
+	{
+		cout <<"There are no more cards in the deck!" <<endl;
+		return curr->nodeValue;
+	}
+
+	//set current to the front and use it to find the value of the card we are dealing.
+	curr = front;
+
+	//Move the front pointer to the next card as we are deleting the top of the list.
+	front = front->next;
+	deckSize--;
+
+	return curr->nodeValue;
+}
+
+// replaceCard() function will add a new card to the end of the deck;
+void deck::replaceCard(const card tempCard)
+{
+	node<card> *curr;
+
+	// Set curr to the last node in the list and create a new node after it.
+	curr = last;
+	curr->next = new node<card>(tempCard);
+	deckSize++;
+	
+	//Set last to the new last node.
+	last = curr->next;
+
+	return;
+}
+
+void deck::shuffleDeck()
+{
+	node<card> *moveNode;
+	node<card> *prev;
+
+	for (int i = 0; i < 52; i++)
+	{
+		moveNode = front;
+		prev = moveNode;
+		front = front->next;
+
+		for (int i = 0; i < (rand.random(deckSize)); i++)
+		{
+			prev = prev->next;
+		}
+
+		if (moveNode != prev)
+		{
+			moveNode->next = prev->next;
+			prev->next = moveNode;
+		}
+		else
+		{
+			continue;
+		}
+
 	}
 }
 
@@ -154,6 +341,22 @@ card::card(const int value, const int suit)
 {
 	cardValue = value;
 	cardSuit = suit;
+}
+
+//card copy constructor
+card::card(const card &tempCard)
+{
+	cardValue = tempCard.cardValue;
+	cardSuit = tempCard.cardSuit;
+}
+
+// Overloaded assignment operator for the card class.
+card &card::operator= (const card &rhs)
+{
+	cardValue = rhs.cardValue;
+	cardSuit = rhs.cardSuit;
+
+	return *this;
 }
 
 void card::setValue(const int value)
@@ -182,11 +385,9 @@ void card::setSuit(const int suit)
 
 int main()
 {
-	deck myDeck;
-
 	try
 	{
-		myDeck.makeDeck();
+		playFlip();	
 	}
 
 	// Catch any errors that may be thrown.
@@ -198,9 +399,6 @@ int main()
 	{
 		cerr <<re.what() <<endl;
 	}
-
-	// Print out the contents of the deck.
-	cout <<myDeck;
 
 	system("pause");
 	return 0;
