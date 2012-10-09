@@ -1,4 +1,5 @@
 /* Zachary Berry and Patrick Willett (berwil)
+ * Project 2-b
  * This program will create a deck object then create a linked list of 52 cards in the deck. All of the cards
  * will then be printed with overloaded operators.
  */
@@ -120,55 +121,51 @@ ostream& operator<< (ostream& ostr, deck& tempDeck)
 }
 
 
-
-int newScore(int score, card c)
+// newScore Function will compute the score the user has as they draw a card.
+int newScore(int score, card tempCard)
 {
-	/*
-	To take a card, the player turns over the top card on the deck and
-	(a) receives 10 points for an ace,
-	(b) receives 5 points for a king, queen or jack,
-	(c) receives 0 points for an 8, 9 or 10,
-	(d) loses half their points for a 7,
-	(e) loses all their points for a 2, 3, 4, 5 or 6, and
-	(f) receives 1 point extra, in addition to the above, for a heart. */
-
-	int value = c.getValue();
-	int suit = c.getSuit();
+	int value = tempCard.getValue();
+	int suit = tempCard.getSuit();
 
 	if (value == 14)
 	{
-		//ace
+		//Card is an ace.
 		score += 10;
 	}
 	else if (value > 10 && value < 14)
 	{
-		//King, queen, Jack
+		//Card is Jack, Queen or King
 		score += 5;
 	}
 	 
 	else if (value == 7)
 	{
-		score = score/2;  //half the score
+		// Card is 7
+		score = score/2;
 	}
 	else if (value >= 2 && value <= 6)
 	{
+		// Card is between 2 and 6.
 		score = 0;
 	}
 
 	if(suit == HEART)
 	{
+		// Card is a heart. 
 		score++;
 	}
-	
+
 	return score;
 }
 
+// playFlip() function will play the Flip game.
 void playFlip()
 {
 	int usrInput, score = 0;
 	deck myDeck;
 	card tempCard;
 
+	// Explain the rules of the game to the user.
 	cout <<"Welcome to Flip! The point of the game is to end the game with the most points. \n"
 		 <<"You can keep taking cards until you decide to end the game. To take a card enter 1 below and 0 to end game. \n"
 		 <<"The point system is as follows: \n"
@@ -176,16 +173,16 @@ void playFlip()
 		 <<"(b) receives 5 points for a king, queen or jack, \n"
          <<"(c) receives 0 points for an 8, 9 or 10, \n"
 		 <<"(d) loses half their points for a 7, \n"
-		 <<"(e)	loses all their points for a 2, 3, 4, 5 or 6, and \n"
+		 <<"(e) loses all their points for a 2, 3, 4, 5 or 6, and \n"
 		 <<"(f) receives 1 point extra, in addition to the above, for a heart. \n \n \n";
 
-	for (int i = 0; i < 1; i++)
+	// SHuffle the deck three times.
+	for (int i = 0; i < 3; i++)
 	{
 		myDeck.shuffleDeck();
-		cout <<i <<endl <<myDeck;
 	}
 
-	return;
+	// Continue to play the game until the user enters a 0.
 	while (true)
 	{
 		cout <<"Please enter choose whether you want to end the game of draw a card. (0 - end | 1 - draw): ";
@@ -195,6 +192,8 @@ void playFlip()
 		{
 			break;
 		}
+
+		// Deal a card from the top of the deck and compute the score.
 		else if (usrInput == 1)
 		{
 			tempCard = myDeck.dealCard();
@@ -203,11 +202,14 @@ void playFlip()
 		}
 		else
 		{
-			//throw range
+			throw rangeError("playFlip() entered a number not in range.");
 		}
 
-		cout <<"score: " <<score <<endl;
+		cout <<"Your Current Score: " <<score <<endl;
 	}
+
+	cout <<"Your final score of the game is: " <<score <<endl;
+	return;
 }
 
 // deck constructor
@@ -256,7 +258,6 @@ void deck::makeDeck()
 			}
 			else
 			{
-				cout <<deckSize <<endl;
 				last = curr;
 			}
 		}
@@ -292,6 +293,10 @@ void deck::replaceCard(const card tempCard)
 	// Set curr to the last node in the list and create a new node after it.
 	curr = last;
 	curr->next = new node<card>(tempCard);
+	if (curr->next == NULL)
+	{
+		throw memoryAllocationError("deck::replaceCard(): Memory not allocated correctly.");
+	}
 	deckSize++;
 	
 	//Set last to the new last node.
@@ -300,27 +305,36 @@ void deck::replaceCard(const card tempCard)
 	return;
 }
 
+// shuffleDeck() will shuffle the deck by taking the first node in the list and putting it somewhere random in the deck. 
 void deck::shuffleDeck()
 {
 	node<card> *moveNode;
 	node<card> *prev;
+	int deckPosition;
 
+	// Preform the switch 52 times.
 	for (int i = 0; i < 52; i++)
 	{
+		// Readjust the front pointer.
 		moveNode = front;
 		prev = moveNode;
 		front = front->next;
 
-		for (int i = 0; i < (rand.random(deckSize)); i++)
+		// Find a random position in the list and move to it.
+		deckPosition = rand.random(deckSize);
+
+		// 
+		for (int i = 0; i < deckPosition; i++)
 		{
 			prev = prev->next;
 		}
 
-		if (moveNode != prev)
+		if (moveNode != prev && prev != NULL)
 		{
 			moveNode->next = prev->next;
 			prev->next = moveNode;
 		}
+		// Any other case do not perform a move.
 		else
 		{
 			continue;
