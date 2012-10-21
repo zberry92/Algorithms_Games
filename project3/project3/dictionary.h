@@ -15,7 +15,7 @@ public:
 	void importWords();
 	int partition(vector<string> ourWords, int left, int right);
 	void quickSort(vector<string> ourWords, int left, int right);
-	int binSearch(const vector<string> ourWords, int first, int last, string target);
+	int binSearch(const vector<string> ourWords, int first, int last, string target, int compFlag);
 	int getMaxWordSize() const;
 	bool verifyWord(string str);
 	void checkWord(string str);
@@ -67,6 +67,10 @@ void dictionary::importWords()
 
 	totalWords = numWords;
 	std::cout <<"Loading complete!" <<endl;
+
+	std::cout <<"Sorting the words now..." <<endl;
+	quickSort(words, 0, totalWords - 1);
+	std::cout <<"List has now been sorted alphabetically!" <<endl;
 	return;
 }
 
@@ -76,9 +80,9 @@ int dictionary::partition(vector<string> ourWords, int left, int right)
   string str;
 
   str = ourWords[left];
-  start = left;
+  position = left;
   
-  for (int i = start + 1; i <= right; i++)
+  for (int i = position + 1; i <= right; i++)
     {
       if (ourWords[i].compare(str) < 0)
 	{

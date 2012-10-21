@@ -1,12 +1,12 @@
 /*
  * Zachary Berry and Patrick Willett (berwil)
- * Project 3-a
+ * Project 3-b
  * This project will prompt the user to input a file containing a a scrambled word grid. It will then search
  * the grid for words of 5 characters or more in all directions. It will use a brute force method of finding the 
  * numbers.
  */
 
-#include "dictionary.h"
+#include "grid.h"
 
 using namespace std;
 
@@ -33,16 +33,15 @@ void testSearch(string fileName)
 void findMatches(dictionary &wordList, grid &wordGrid)
 {
 	// Bring the grid object into the dictionary object. 
-	wordList.setValues(wordGrid);
 	cout <<"Looking for words. This may take a while..." <<endl;
 	cout <<"Found Words:" <<endl;
 
 	cout <<"Searching Horizontally:" <<endl;
-	wordList.scanHori();
+	wordGrid.scanHori();
 	cout <<endl <<"Searching Vertically:" <<endl;
-	wordList.scanVert();
+	wordGrid.scanVert();
 	cout <<endl <<"Searching Diagonally:" <<endl;
-	wordList.scanDiag();
+	wordGrid.scanDiag();
 
 	cout <<"All words have been found!" <<endl;
 
@@ -74,6 +73,6 @@ int main()
 		cerr <<re.what() <<endl;
 	}
 
-	system("pause");
+        cin >>usrValue;
 	return 0;
 }
