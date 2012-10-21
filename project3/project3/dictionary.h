@@ -52,7 +52,7 @@ void dictionary::importWords()
 
 	while (inFile >> currWord)
 	{
-		if (maxWordLength < currWord.size())
+		if (maxWordLength < (int) currWord.size())
 		{
 			maxWordLength = currWord.size();
 		}
@@ -83,14 +83,14 @@ int dictionary::partition(vector<string> ourWords, int left, int right)
   position = left;
   
   for (int i = position + 1; i <= right; i++)
-    {
-      if (ourWords[i].compare(str) < 0)
+  {
+	if (ourWords[i].compare(str) < 0)
 	{
 	  swap(ourWords[position + 1], ourWords[i]);
 	  swap(ourWords[position], ourWords[position + 1]);
 	  position++;
 	}
-    }
+  }
 
   return position;
 }
@@ -100,14 +100,14 @@ void dictionary::quickSort(vector<string> ourWords, int left, int right)
   int p;
 
   if (left < right)
-    {
+  {
       p = partition(ourWords, left, right);
       quickSort(ourWords, left, p - 1);
       quickSort(ourWords, p + 1, right);
-    }
+  }
 }
 
-int binSearch(const vector<string> ourWords, int first, int last, string target, int compFlag)
+int dictionary::binSearch(const vector<string> ourWords, int first, int last, string target, int compFlag)
 {
 	int midPoint;
 	string midStr;

@@ -73,6 +73,6 @@ int main()
 		cerr <<re.what() <<endl;
 	}
 
-        cin >>usrValue;
+    system("pause");
 	return 0;
 }
