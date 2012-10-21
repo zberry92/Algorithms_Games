@@ -1,11 +1,7 @@
 #ifndef GRID_CLASS
 #define GRID_CLASS
 
-#include <iostream>
-#include <fstream>
-#include <string>
-#include "d_matrix.h"
-#include "d_except.h"
+#include "dictionary.h"
 
 using namespace std;
 
@@ -22,6 +18,7 @@ public:
 
 private:
 	int gridWidth, gridHeight;
+	dictionary ourDict;
 	matrix<char> gridMatrix;
 	const string gridName;
 };
@@ -81,23 +78,39 @@ void grid::importGrid()
 }
 
 // scanHori() will scan for all horizontal words from left-to-right and right-to-left
-void dictionary::scanHori()
+void grid::scanHori()
 {
 	string testStr = "";
 	int tempCount;
+	int wordSize = ourDict.getMaxWordSize() + 1;
 
 	// Scan the grid from left-to-right.
-	for (int j = 0; j < height; j++)
+	for (int j = 0; j < gridHeight; j++)
 	{
-		for (int i = 0; i < width;i++)
+		for (int i = 0; i < gridWidth;i++)
 		{
-			testStr = grid.getChar(i, j);
+			testStr = gridMatrix[i][j];
 			tempCount = i;
 
-			while (testStr.length() != maxWordSize)
+			// Increment the number as long as it isn't the end of the grid.
+			if (tempCount != (gridWidth - 1))
 			{
+				tempCount++;
+			}
+			else
+			{
+				tempCount = 0;
+			}
+
+			while (tempCount != i) //fix
+			{
+				if (testStr.length() != wordSize)
+				{
+					break;
+				}
+
 				// Increment the number as long as it isn't the end of the grid.
-				if (tempCount != width - 1)
+				if (tempCount != (gridWidth - 1))
 				{
 					tempCount++;
 				}
@@ -109,49 +122,23 @@ void dictionary::scanHori()
 				//Be sure the word is at least five characters long.
 				if (testStr.length() < 5)
 				{
-					testStr += grid.getChar(tempCount, j);
+					testStr += gridMatrix[tempCount][j];
 				}
 				else
 				{
+					if (testStr.length() == 5)
+					{
+						if (!(ourDict.verifyWord(testStr)))
+						{
+							break;
+						}
+					}
+
 					// Check to see if the word is in the dictionary.
-					checkWord(testStr);
-					testStr += grid.getChar(tempCount, j);
+					ourDict.checkWord(testStr);
+					testStr += gridMatrix[tempCount][j];
 				}
 			}
-			checkWord(testStr);
-		}
-	}
-
-	// Scan the grid from right-to-left
-	for (int j = 0; j < height; j++)  //j is height
-	{
-		for (int i = 0; i < width;i++) //i is width
-		{
-			testStr = gird.getChar(i, j);
-			tempCount = i;
-
-			while (testStr.length() != maxWordSize)
-			{
-				if (tempCount != 0)
-				{
-					tempCount--;
-				}
-				else
-				{
-					tempCount = width - 1;
-				}
-
-				if (testStr.length() < 5)
-				{
-					testStr += grid.getChar(tempCount, j);
-				}
-				else
-				{
-					checkWord(testStr);
-					testStr += grid.getChar(tempCount, j);
-				}
-			}
-			checkWord(testStr);
 		}
 	}
 
@@ -159,22 +146,39 @@ void dictionary::scanHori()
 }
 
 // scanVert() will scan the list from up-to-down and down-to-up.
-void dictionary::scanVert()
+void grid::scanVert()
 {
 	string testStr = "";
 	int tempCount;
+	int wordSize = ourDict.getMaxWordSize() + 1;
 
-	// Up-to-down
-	for (int j = 0; j < height; j++)
+	// Scan the grid from left-to-right.
+	for (int j = 0; j < gridHeight; j++)
 	{
-		for (int i = 0; i < width;i++)
+		for (int i = 0; i < gridWidth;i++)
 		{
-			testStr = grid.getChar(i, j);
+			testStr = gridMatrix[i][j];
 			tempCount = j;
 
-			while (testStr.length() != maxWordSize)
+			// Increment the number as long as it isn't the end of the grid.
+			if (tempCount != (gridHeight - 1))
 			{
-				if (tempCount != height - 1)
+				tempCount++;
+			}
+			else
+			{
+				tempCount = 0;
+			}
+
+			while (tempCount != j) 
+			{
+				if (testStr.length() != wordSize)
+				{
+					break;
+				}
+
+				// Increment the number as long as it isn't the end of the grid.
+				if (tempCount != (gridWidth - 1))
 				{
 					tempCount++;
 				}
@@ -182,51 +186,27 @@ void dictionary::scanVert()
 				{
 					tempCount = 0;
 				}
-
+				
+				//Be sure the word is at least five characters long.
 				if (testStr.length() < 5)
 				{
-					testStr += grid.getChar(i, tempCount);
+					testStr += gridMatrix[i][tempCount];
 				}
 				else
 				{
-					checkWord(testStr);
-					testStr += grid.getChar(i, tempCount);
+					if (testStr.length() == 5)
+					{
+						if (!(ourDict.verifyWord(testStr)))
+						{
+							break;
+						}
+					}
+
+					// Check to see if the word is in the dictionary.
+					ourDict.checkWord(testStr);
+					testStr += gridMatrix[tempCount][j];
 				}
 			}
-			checkWord(testStr);
-		}
-	}
-
-	// Down-to-up
-	for (int j = 0; j < height; j++)  
-	{
-		for (int i = 0; i < width;i++) 
-		{
-			testStr = grid.getChar(i, j);
-			tempCount = j;
-
-			while (testStr.length() != maxWordSize)
-			{
-				if (tempCount != 0)
-				{
-					tempCount--;
-				}
-				else
-				{
-					tempCount = height - 1;
-				}
-
-				if (testStr.length() < 5)
-				{
-					testStr += grid.getChar(i, tempCount);
-				}
-				else
-				{
-					checkWord(testStr);
-					testStr += grid.getChar(i, tempCount);
-				}
-			}
-			checkWord(testStr);
 		}
 	}
 
@@ -234,173 +214,172 @@ void dictionary::scanVert()
 }
 
 // scanDiag() will scan all possible diagonals.
-void dictionary::scanDiag()
+void grid::scanDiag()
 {
 	int tempI, tempJ;
 	string testStr = "";
+	int wordSize = ourDict.getMaxWordSize() + 1;
 
-	// Scan in the south-east diagonal direction.
-	for (int j = 0; j < height; j++)
+	// Scan in the south-east, north-west diagonal directions.
+	for (int j = 0; j < gridHeight; j++)
 	{
-		for (int i = 0; i < width;i++)
+		for (int i = 0; i < gridWidth;i++)
 		{
-			testStr = ourWords[i][j];
+			testStr = gridMatrix[i][j];
 			tempI = i;
 			tempJ = j;
-			while (testStr.length() != maxWordSize)
+
+			if (tempI != (gridWidth - 1) && tempJ != (gridHeight - 1))
 			{
-				// Check for all position possibilities and increment accordingly.
-				if (tempI != (width - 1) && tempJ != (height - 1))
+				tempI++;
+				tempJ++;
+			}
+			else if (tempI == (gridWidth - 1) && tempJ == (gridHeight - 1))
+			{
+				tempI = 0;
+				tempJ = 0;
+			}
+			else if (tempI == (gridWidth - 1))
+			{
+				tempI = 0;
+				tempJ++;
+			}
+			else if (tempJ == (gridHeight - 1))
+			{
+				tempJ = 0;
+				tempI++;
+			}
+
+			while (tempI != i && tempJ != j) //fix
+			{
+				if (testStr.length() != wordSize)
 				{
-					tempI++;
-					tempJ++;
-				}
-				// If at the end of the row
-				else if (tempI == (width - 1))
-				{
-					tempI = height - tempJ - 1;
-					tempJ = 0;
-				}
-				// If at the end of the column.
-				else if (tempJ == (height - 1))
-				{
-					tempJ = width - tempI - 1;
-					tempI = 0;
+					break;
 				}
 
+				// Increment the number as long as it isn't the end of the grid.
+				if (tempI != (gridWidth - 1) && tempJ != (gridHeight - 1))
+				{
+					tempI++;
+					tempJ--;
+				}
+				else if (tempI == (gridWidth - 1) && tempJ == (gridHeight - 1))
+				{
+					tempI = 0;
+					tempJ = 0;
+				}
+				else if (tempI == (gridWidth - 1))
+				{
+					tempI = 0;
+					tempJ++;
+				}
+				else if (tempJ == (gridHeight - 1))
+				{
+					tempJ = 0;
+					tempI++;
+				}
+
+				//Be sure the word is at least five characters long.
 				if (testStr.length() < 5)
 				{
-					testStr += ourWords[tempI][tempJ];
+					testStr += gridMatrix[tempI][tempJ];
 				}
 				else
 				{
-					checkWord(testStr);
-					testStr += ourWords[tempI][tempJ];
+					if (testStr.length() == 5)
+					{
+						if (!(ourDict.verifyWord(testStr)))
+						{
+							break;
+						}
+					}
+
+					// Check to see if the word is in the dictionary.
+					ourDict.checkWord(testStr);
+					testStr += gridMatrix[tempI][tempJ];
 				}
-			}
-			checkWord(testStr);
+			}	
 		}
 	}
 
 	// Scans for words in the north-east direction.
-	for (int j = 0; j < height; j++)
+	for (int j = 0; j < gridHeight; j++)
 	{
-		for (int i = 0; i < width;i++) 
+		for (int i = 0; i < gridWidth;i++)
 		{
-			testStr = ourWords[i][j];
+			testStr = gridMatrix[i][j];
 			tempI = i;
 			tempJ = j;
-			while (testStr.length() != maxWordSize)
+
+			if (tempI != (gridWidth - 1) && tempJ != 0)
 			{
-				if (tempI != (width - 1) && tempJ != 0)
+				tempI++;
+				tempJ--;
+			}
+			else if (tempI == (gridWidth - 1))
+			{
+				tempI = 0;
+				tempJ--;
+			}
+			else if (tempJ == 0)
+			{
+				tempJ = 0;
+				tempI++;
+			}
+
+			while (tempI != i && tempJ != j) //fix
+			{
+				if (testStr.length() != wordSize)
+				{
+					break;
+				}
+
+				// Increment the number as long as it isn't the end of the grid.
+				if (tempI != (gridWidth - 1) && tempJ != 0)
 				{
 					tempI++;
 					tempJ--;
 				}
-				else if (tempI == (width - 1))
+				else if (tempI == (gridWidth - 1) && tempJ == 0)
 				{
-					tempI = tempJ;
-					tempJ = height - 1;
+					tempI = 0;
+					tempJ = (gridHeight - 1);
 				}
 				else if (tempJ == 0)
 				{
-					tempJ = tempI;
+					tempI++;
+					tempJ = (gridHeight - 1);
+				}
+				else if (tempI == (gridWidth - 1))
+				{
 					tempI = 0;
-				}
-
-				if (testStr.length() < 5)
-				{
-					testStr += ourWords[tempI][tempJ];
-				}
-				else
-				{
-					checkWord(testStr);
-					testStr += ourWords[tempI][tempJ];
-				}
-			}
-			checkWord(testStr);
-		}
-	}
-
-	// Scans for words in the north-west direction.
-	for (int j = 0; j < height; j++)
-	{
-		for (int i = 0; i < width;i++)
-		{
-			testStr = ourWords[i][j];
-			tempI = i;
-			tempJ = j;
-			while (testStr.length() != maxWordSize)
-			{
-				if (tempI != 0 && tempJ != 0)
-				{
-					tempI--;
 					tempJ--;
 				}
-				else if (tempI == 0)
-				{
-					tempI = width - tempJ - 1;
-					tempJ = height - 1;
-				}
-				else if (tempJ == 0)
-				{
-					tempJ = width - tempI - 1;
-					tempI = width - 1;
-				}
 
+				//Be sure the word is at least five characters long.
 				if (testStr.length() < 5)
 				{
-					testStr += ourWords[tempI][tempJ];
+					testStr += gridMatrix[tempI][tempJ];
 				}
 				else
 				{
-					checkWord(testStr);
-					testStr += ourWords[tempI][tempJ];
+					if (testStr.length() == 5)
+					{
+						if (!(ourDict.verifyWord(testStr)))
+						{
+							break;
+						}
+					}
+
+					// Check to see if the word is in the dictionary.
+					ourDict.checkWord(testStr);
+					testStr += gridMatrix[tempI][tempJ];
 				}
-			}
-			checkWord(testStr);
+			}	
 		}
 	}
 
-	// Scans for words in the south-west direction.
-	for (int j = 0; j < height; j++) 
-	{
-		for (int i = 0; i < width;i++)
-		{
-			testStr = ourWords[i][j];
-			tempI = i;
-			tempJ = j;
-			while (testStr.length() != maxWordSize)
-			{
-				if (tempI != 0 && tempJ != (height - 1))
-				{
-					tempI--;
-					tempJ++;
-				}
-				else if (tempI == 0)
-				{
-					tempI = tempJ;
-					tempJ = 0;
-				}
-				else if (tempJ == height - 1)
-				{
-					tempJ = tempI;
-					tempI = width - 1;
-				}
-
-				if (testStr.length() < 5)
-				{
-					testStr += ourWords[tempI][tempJ];
-				}
-				else
-				{
-					checkWord(testStr);
-					testStr += ourWords[tempI][tempJ];
-				}
-			}
-			checkWord(testStr);
-		}
-	}
+	return;
 }
 
 #endif // GRID_CLASS

@@ -2,27 +2,33 @@
 #define DICTIONARY_CLASS
 
 #include <vector>
-#include "grid.h"
+#include <iostream>
+#include <fstream>
+#include <string>
+#include "d_matrix.h"
+#include "d_except.h"
 
 // Dictionary class to handle all word comparison work.
 class dictionary{
 public:
 	dictionary();
 	void importWords();
-	void setValues(grid tempGrid);
-	
+	int binSearch(const vector<string>ourWords, int first, int last, string target);
+	int getMaxWordSize() const;
+	bool verifyWord(string str);
 	void checkWord(string str);
 
 private:
-	int width, height, maxWordLength;
+	int maxWordLength, fFlag, rFlag;
 	vector<string> words;
 };
 
 // Default constructor
 dictionary::dictionary()
 {
-	width = 0;
-	height = 0;
+	maxWordLength = 0;
+	fFlag = 0;
+	rFlag = 0;
 }
 
 // importWords() imports all the words from the the dictionary file.
@@ -58,27 +64,103 @@ void dictionary::importWords()
 
 	std::cout <<"Loading complete!" <<endl;
 	return;
-}	
+}
 
-// setValues() takes values from the grid class and applies them to values in the dictionary class.
-void dictionary::setValues(grid tempGrid)
+int binSearch(const vector<string>ourWords, int first, int last, string target)
 {
-	width = tempGrid.getWidth();
-	height = tempGrid.getHeight();
+	int midPoint;
+	string midStr;
+
+	while (first < last)
+	{
+		midPoint = (first + last) / 2;
+		midStr = ourWords[midPoint];
+
+		if (target == midStr)
+		{
+			return midPoint;
+		}
+		else if (target.compare(midStr) < 0)
+		{
+			last = midPoint;
+		}
+		else
+		{
+			first = midPoint;
+		}
+	}
+
+	return -1;
 }
 
 
 
+// setValues() takes values from the grid class and applies them to values in the dictionary class.
+int dictionary::getMaxWordSize() const
+{
+	return maxWordLength;
+}
+
+bool dictionary::verifyWord(string str)
+{
+	string revStr;
+
+	for (int i = 0; i < (int) words.size(); i++)
+	{
+		if (words[i].compare(0, 5, str) == 0)
+		{
+				fFlag = 1;
+		}
+	}
+
+	revStr = string(str.rbegin(), str.rend());
+	for (int i = 0; i < (int) words.size(); i++)
+	{
+		if (words[i].compare(0, 5, revStr) == 0)
+		{
+				rFlag = 1;
+		}
+	}
+
+	if (fFlag == 0 && rFlag == 0)
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
+}
+
 // checkWord() verifies that the word is in the dictionary and prints the word if true.
 void dictionary::checkWord(string str)
 {	
-	for (int i = 0; i < (int) words.size(); i++)
+	string  revStr;
+
+	if (fFlag == 1)
 	{
-		if (str == words[i])
+		for (int i = 0; i < (int) words.size(); i++)
 		{
-				cout <<str <<endl;
+			if (str == words[i])
+			{
+					cout <<str <<endl;
+			}
 		}
 	}
+
+	if (rFlag == 1)
+	{
+		revStr = string(str.rbegin(), str.rend());
+		for (int i = 0; i < (int) words.size(); i++)
+		{
+			if (revStr == words[i])
+			{
+					cout <<revStr <<endl;
+			}
+		}
+	}
+
+	return;
 }
 
 #endif // DICTIONARY_CLASS
