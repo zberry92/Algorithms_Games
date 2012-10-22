@@ -12,13 +12,12 @@ public:
 	grid();
 	grid(string fileName);
 	void importGrid();
-	void scanHori();
-	void scanVert();
-	void scanDiag();
+	void scanHori(dictionary &ourDict);
+	void scanVert(dictionary &ourDict);
+	void scanDiag(dictionary &ourDict);
 
 private:
 	int gridWidth, gridHeight;
-	dictionary ourDict;
 	matrix<char> gridMatrix;
 	const string gridName;
 };
@@ -78,16 +77,16 @@ void grid::importGrid()
 }
 
 // scanHori() will scan for all horizontal words from left-to-right and right-to-left
-void grid::scanHori()
+void grid::scanHori(dictionary &ourDict)
 {
 	string testStr = "";
 	int tempCount;
-	int wordSize = ourDict.getMaxWordSize() + 1;
+	int wordSize = ourDict.getMaxWordSize();
 
 	// Scan the grid from left-to-right.
 	for (int j = 0; j < gridHeight; j++)
 	{
-		for (int i = 0; i < gridWidth;i++)
+		for (int i = 0; i < gridWidth; i++)
 		{
 			testStr = gridMatrix[i][j];
 			tempCount = i;
@@ -102,9 +101,11 @@ void grid::scanHori()
 				tempCount = 0;
 			}
 
-			while (tempCount != i) //fix
+			testStr += gridMatrix[tempCount][j];
+
+			while (tempCount != i) // While we have not looped comletely around.
 			{
-				if (testStr.length() != wordSize)
+				if ((int) testStr.length() > wordSize)
 				{
 					break;
 				}
@@ -119,21 +120,13 @@ void grid::scanHori()
 					tempCount = 0;
 				}
 				
-				//Be sure the word is at least five characters long.
+				// Be sure the word is at least five characters long.
 				if (testStr.length() < 5)
 				{
 					testStr += gridMatrix[tempCount][j];
 				}
 				else
 				{
-					if (testStr.length() == 5)
-					{
-						if (!(ourDict.verifyWord(testStr)))
-						{
-							break;
-						}
-					}
-
 					// Check to see if the word is in the dictionary.
 					ourDict.checkWord(testStr);
 					testStr += gridMatrix[tempCount][j];
@@ -146,11 +139,11 @@ void grid::scanHori()
 }
 
 // scanVert() will scan the list from up-to-down and down-to-up.
-void grid::scanVert()
+void grid::scanVert(dictionary &ourDict)
 {
 	string testStr = "";
 	int tempCount;
-	int wordSize = ourDict.getMaxWordSize() + 1;
+	int wordSize = ourDict.getMaxWordSize();
 
 	// Scan the grid from left-to-right.
 	for (int j = 0; j < gridHeight; j++)
@@ -170,9 +163,11 @@ void grid::scanVert()
 				tempCount = 0;
 			}
 
+			testStr += gridMatrix[i][tempCount];
+
 			while (tempCount != j) 
 			{
-				if (testStr.length() != wordSize)
+				if ((int) testStr.length() > (wordSize))
 				{
 					break;
 				}
@@ -194,14 +189,6 @@ void grid::scanVert()
 				}
 				else
 				{
-					if (testStr.length() == 5)
-					{
-						if (!(ourDict.verifyWord(testStr)))
-						{
-							break;
-						}
-					}
-
 					// Check to see if the word is in the dictionary.
 					ourDict.checkWord(testStr);
 					testStr += gridMatrix[tempCount][j];
@@ -214,11 +201,11 @@ void grid::scanVert()
 }
 
 // scanDiag() will scan all possible diagonals.
-void grid::scanDiag()
+void grid::scanDiag(dictionary &ourDict)
 {
 	int tempI, tempJ;
 	string testStr = "";
-	int wordSize = ourDict.getMaxWordSize() + 1;
+	int wordSize = ourDict.getMaxWordSize();
 
 	// Scan in the south-east, north-west diagonal directions.
 	for (int j = 0; j < gridHeight; j++)
@@ -250,9 +237,11 @@ void grid::scanDiag()
 				tempI++;
 			}
 
-			while (tempI != i && tempJ != j) //fix
+			testStr += gridMatrix[tempI][tempJ];
+
+			while (tempI != i && tempJ != j) 
 			{
-				if (testStr.length() != wordSize)
+				if ((int) testStr.length() > wordSize)
 				{
 					break;
 				}
@@ -261,7 +250,7 @@ void grid::scanDiag()
 				if (tempI != (gridWidth - 1) && tempJ != (gridHeight - 1))
 				{
 					tempI++;
-					tempJ--;
+					tempJ++;
 				}
 				else if (tempI == (gridWidth - 1) && tempJ == (gridHeight - 1))
 				{
@@ -286,14 +275,6 @@ void grid::scanDiag()
 				}
 				else
 				{
-					if (testStr.length() == 5)
-					{
-						if (!(ourDict.verifyWord(testStr)))
-						{
-							break;
-						}
-					}
-
 					// Check to see if the word is in the dictionary.
 					ourDict.checkWord(testStr);
 					testStr += gridMatrix[tempI][tempJ];
@@ -316,6 +297,11 @@ void grid::scanDiag()
 				tempI++;
 				tempJ--;
 			}
+			else if (tempI == (gridWidth - 1) && tempJ == 0)
+			{
+				tempI = 0;
+				tempJ = gridHeight - 1;
+			}
 			else if (tempI == (gridWidth - 1))
 			{
 				tempI = 0;
@@ -327,7 +313,9 @@ void grid::scanDiag()
 				tempI++;
 			}
 
-			while (tempI != i && tempJ != j) //fix
+			testStr += gridMatrix[tempI][tempJ];
+
+			while (tempI != i && tempJ != j) 
 			{
 				if (testStr.length() != wordSize)
 				{
@@ -363,14 +351,6 @@ void grid::scanDiag()
 				}
 				else
 				{
-					if (testStr.length() == 5)
-					{
-						if (!(ourDict.verifyWord(testStr)))
-						{
-							break;
-						}
-					}
-
 					// Check to see if the word is in the dictionary.
 					ourDict.checkWord(testStr);
 					testStr += gridMatrix[tempI][tempJ];

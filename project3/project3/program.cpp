@@ -2,8 +2,14 @@
  * Zachary Berry and Patrick Willett (berwil)
  * Project 3-b
  * This project will prompt the user to input a file containing a a scrambled word grid. It will then search
- * the grid for words of 5 characters or more in all directions. It will use a brute force method of finding the 
- * numbers.
+ * the grid for words of 5 characters or more in all directions. It will use binary search to find the matching
+ * word in the dictionary if it exists. In terms of other optimization we: 
+ * - Sorted our list with Quick Sort and used Binary Search to find matching words
+ * - Removed all words under 5 characters from the dictionary class
+ * - If words exceeded the maximum amount of characters in the dictionary words (22) we did not check them.
+ * - Revamped the dictionary and grid objects to cut down copying of objects.
+ * - To check the reverse cases we just flipped the string when checking for its forward counter part, thus
+ *   removing half of our for loops.
  */
 
 #include "grid.h"
@@ -37,11 +43,11 @@ void findMatches(dictionary &wordList, grid &wordGrid)
 	cout <<"Found Words:" <<endl;
 
 	cout <<"Searching Horizontally:" <<endl;
-	wordGrid.scanHori();
+	wordGrid.scanHori(wordList);
 	cout <<endl <<"Searching Vertically:" <<endl;
-	wordGrid.scanVert();
+	wordGrid.scanVert(wordList);
 	cout <<endl <<"Searching Diagonally:" <<endl;
-	wordGrid.scanDiag();
+	wordGrid.scanDiag(wordList);
 
 	cout <<"All words have been found!" <<endl;
 

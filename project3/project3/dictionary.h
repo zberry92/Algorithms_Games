@@ -13,15 +13,15 @@ class dictionary{
 public:
 	dictionary();
 	void importWords();
-	int partition(vector<string> ourWords, int left, int right);
-	void quickSort(vector<string> ourWords, int left, int right);
-	int binSearch(const vector<string> ourWords, int first, int last, string target, int compFlag);
+	int partition(vector<string> &ourWords, int left, int right);
+	void quickSort(vector<string> &ourWords, int left, int right);
+	int binSearch(const vector<string> &ourWords, int first, int last, string target);
 	int getMaxWordSize() const;
-	bool verifyWord(string str);
 	void checkWord(string str);
+	void bubbleSort();
 
 private:
-	int maxWordLength, totalWords, fFlag, rFlag;
+	int maxWordLength, totalWords;
 	vector<string> words;
 };
 
@@ -30,8 +30,6 @@ dictionary::dictionary()
 {
 	maxWordLength = 0;
 	totalWords = 0;
-	fFlag = 0;
-	rFlag = 0;
 }
 
 // importWords() imports all the words from the the dictionary file.
@@ -52,16 +50,19 @@ void dictionary::importWords()
 
 	while (inFile >> currWord)
 	{
-		if (maxWordLength < (int) currWord.size())
+		if (maxWordLength < (int) currWord.size()) // Find the maximum size of the words in our dictionary.
 		{
 			maxWordLength = currWord.size();
 		}
-
-		words.push_back(currWord);
-		numWords++;
-		if ((numWords % 5000) == 0)
+		
+		if (currWord.length() >= 5)
 		{
-			std::cout <<numWords <<" words have been loaded!" <<endl;
+			words.push_back(currWord);
+			numWords++;
+			if ((numWords % 5000) == 0)
+			{
+				std::cout <<numWords <<" words have been loaded!" <<endl;
+			}
 		}
 	}
 
@@ -69,12 +70,13 @@ void dictionary::importWords()
 	std::cout <<"Loading complete!" <<endl;
 
 	std::cout <<"Sorting the words now..." <<endl;
-	quickSort(words, 0, totalWords - 1);
+	quickSort(words, 0, totalWords - 1); //sort our words.
 	std::cout <<"List has now been sorted alphabetically!" <<endl;
 	return;
 }
 
-int dictionary::partition(vector<string> ourWords, int left, int right)
+// Partition function needed for quicksort algorithm
+int dictionary::partition(vector<string> &ourWords, int left, int right)
 {
   int position;
   string str;
@@ -95,7 +97,9 @@ int dictionary::partition(vector<string> ourWords, int left, int right)
   return position;
 }
 
-void dictionary::quickSort(vector<string> ourWords, int left, int right)
+// quickSort worked extremely well compared to our bubble sort alternative. Since the words are very unsorted, quickSort
+// should be close to its average time of nlog(n). It would only reach the same time of n^2 if the list was mostly sorted.
+void dictionary::quickSort(vector<string> &ourWords, int left, int right)
 {
   int p;
 
@@ -107,22 +111,15 @@ void dictionary::quickSort(vector<string> ourWords, int left, int right)
   }
 }
 
-int dictionary::binSearch(const vector<string> ourWords, int first, int last, string target, int compFlag)
+int dictionary::binSearch(const vector<string> &ourWords, int first, int last, string target)
 {
 	int midPoint;
 	string midStr;
 
-	while (first < last)
+	while (first <= last)
 	{
 		midPoint = (first + last) / 2;
 		midStr = ourWords[midPoint];
-		if (compFlag)
-		{
-		  if (midStr.compare(0, 5, target) == 0)
-		    {
-		      return 1;
-		    }
-		}
 		 
 		if (target == midStr)
 		{
@@ -130,11 +127,11 @@ int dictionary::binSearch(const vector<string> ourWords, int first, int last, st
 		}
 		else if (target.compare(midStr) < 0)
 		{
-			last = midPoint;
+			last = midPoint - 1;
 		}
 		else
 		{
-			first = midPoint;
+			first = midPoint + 1;
 		}
 	}
 
@@ -149,57 +146,59 @@ int dictionary::getMaxWordSize() const
 	return maxWordLength;
 }
 
-bool dictionary::verifyWord(string str)
-{
-	string revStr;
-
-        if (binSearch(words, 0, totalWords, str, 1) == 1)
-	{
-	       fFlag = 1;
-	}
-
-	revStr = string(str.rbegin(), str.rend());
-	if (binSearch(words, 0, totalWords, revStr, 1) == 1)
-	{
-	       rFlag = 1;
-	}
-
-	if (fFlag == 0 && rFlag == 0)
-	{
-		return false;
-	}
-	else
-	{
-		return true;
-	}
-}
-
 // checkWord() verifies that the word is in the dictionary and prints the word if true.
 void dictionary::checkWord(string str)
 {	
 	string  revStr;
 	int match;
 
-	if (fFlag == 1)
+	match = binSearch(words, 0, totalWords - 1, str);
+	if (match != -1)
 	{
-	        match = binSearch(words, 0, totalWords, str, 0);
-	        if (match != -1)
-	        {
-		                       cout <<str <<endl;
-	        }
+		cout <<str <<endl;
 	}
 
-	if (rFlag == 1)
+	revStr = string(str.rbegin(), str.rend());
+	match = binSearch(words, 0, totalWords - 1, revStr);
+	if (match != -1)
 	{
-		revStr = string(str.rbegin(), str.rend());
-	        match = binSearch(words, 0, totalWords, revStr, 0);
-	        if (match != -1)
-	        {
-		                       cout <<revStr <<endl;
-	        }
+		cout <<revStr <<endl;
 	}
 
 	return;
+}
+
+/*
+ * This function was found to be incredibly slow, especially compared to Quicksort. This is a
+ * n^2 function, which makes it take much longer than the nlogn quicksort.
+ * Therefore, it can be seen that this is an incredibly inneficcient function to use,
+ * and shoudln't be used in the future.
+ */
+void dictionary::bubbleSort()
+{
+	int left = 0;
+	int right = totalWords - 1;
+    int j = 0;
+    string s;
+
+	bool flag = true;  //flag to say when the number has been swapped
+    while (flag) 
+	{
+            flag = false;
+            j++;
+
+            for (int i = 0; i < right - left; i++) {
+                  if (words[i] > words[i + 1]) 
+				  {
+                        s = words[i];  //temp copy swap
+                        words[i] = words[i + 1]; //switch
+                        words[i + 1] = s;
+                        flag = true;  //set flag true
+                  }
+            }
+      }
+
+
 }
 
 #endif // DICTIONARY_CLASS
