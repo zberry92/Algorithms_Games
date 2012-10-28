@@ -1,0 +1,5 @@
+/* 
+ * Board class to handle all board operations.
+ */
+#ifndef GRID_CLASS
+#define GRID_CLASS
