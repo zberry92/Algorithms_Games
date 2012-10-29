@@ -34,17 +34,22 @@ class board
       board(int sqSize);
       void clear();
       void initialize(ifstream &fin);
+      bool checkConflicts();
+      void findConflicts();
+      void printConflicts();
       void setCell(int i, int j,
       ValueType getCell(int, int);
-      void print();
       bool isBlank(int i, int j);
-      
+      void print();
       int squareNumber(int i, int j);
       
    private:
       // The following matrices go from 1 to BoardSize in each
       // dimension.  I.e. they are each (BoardSize+1) X (BoardSize+1)
       matrix<ValueType> value;
+      vector<bool> rowConf[BoardSize + 1][BoardSize + 1];
+      vector<bool> colConf[BoardSize + 1][BoardSize + 1];
+      vector<bool> squConf[BoardSize + 1][BoardSize + 1];
 };
 
 // Board Constructor
@@ -84,6 +89,18 @@ void board::initialize(ifstream &fin)
 	 }
       }
    }
+}
+
+bool board::checkConflicts(in val, int i, int j, int k)
+{
+  if (rowConf[i][val] || colConf[j][val] || squConf[k][val])
+  {
+    return false;
+  }
+  else
+  {
+    return true;
+  }
 }
 
 void board::setCell(int i, int j, char val)
@@ -162,7 +179,7 @@ void board::print()
    cout << endl;
 }
 
-int board:: bosquareNumber(int i, int j)
+int board:: squareNumber(int i, int j)
 // Return the square number of cell i,j (counting from left to right,
 // top to bottom.  Note that i and j each go from 1 to BoardSize
 {
