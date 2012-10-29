@@ -13,16 +13,31 @@
 
 using namespace std;
 
+/* Typedefs */
+typedef int ValueType; // The type of the value in a cell
+
+/* Global Variables */
+const int Blank = -1;  // Indicates that a cell is blank
+const int SquareSize = 3;  //  The number of cells in a small square
+                           //  (usually 3).  The board has
+                           //  SquareSize^2 rows and SquareSize^2
+                           //  columns.
+const int BoardSize = SquareSize * SquareSize;
+const int MinValue = 1;
+const int MaxValue = 9;
+int numSolutions = 0;
+
+// Board class to handle all operations regarding the Sudoku board.
 class board
-// Stores the entire Sudoku board
 {
    public:
-      board(int);
+      board(int sqSize);
       void clear();
       void initialize(ifstream &fin);
       void print();
       bool isBlank(int, int);
       ValueType getCell(int, int);
+      int squareNumber(int i, int j);
       
    private:
 
@@ -31,9 +46,9 @@ class board
       matrix<ValueType> value;
 };
 
+// Board Constructor
 board::board(int sqSize)
-   : value(BoardSize+1,BoardSize+1)
-// Board constructor
+   : value(BoardSize + 1, BoardSize + 1)
 {
 }
 
@@ -108,6 +123,16 @@ void board::print()
       cout << "---";
    cout << "-";
    cout << endl;
+}
+
+int board:: bosquareNumber(int i, int j)
+// Return the square number of cell i,j (counting from left to right,
+// top to bottom.  Note that i and j each go from 1 to BoardSize
+{
+   // Note that (int) i/SquareSize and (int) j/SquareSize are the x-y
+   // coordinates of the square that i,j is in.  
+
+   return SquareSize * ((i-1)/SquareSize) + (j-1)/SquareSize + 1;
 }
 
 #endif
