@@ -34,13 +34,14 @@ class board
       board(int sqSize);
       void clear();
       void initialize(ifstream &fin);
-      void print();
-      bool isBlank(int, int);
+      void setCell(int i, int j,
       ValueType getCell(int, int);
+      void print();
+      bool isBlank(int i, int j);
+      
       int squareNumber(int i, int j);
       
    private:
-
       // The following matrices go from 1 to BoardSize in each
       // dimension.  I.e. they are each (BoardSize+1) X (BoardSize+1)
       matrix<ValueType> value;
@@ -52,8 +53,16 @@ board::board(int sqSize)
 {
 }
 
+// Clear the board of all values.
 void board::clear()
 {
+  for (int i = 1; i <= BoardSize; i++)
+  {
+    for (int j = 1; j <= BoardSize; j++)
+    {
+      setCell(i, j, '0');
+    }
+  }	
 }
 
 void board::initialize(ifstream &fin)
@@ -63,6 +72,7 @@ void board::initialize(ifstream &fin)
 
    clear();
    for (int i = 1; i <= BoardSize; i++)
+   {
       for (int j = 1; j <= BoardSize; j++)
       {
 	 fin >> ch;
@@ -70,26 +80,53 @@ void board::initialize(ifstream &fin)
          // If the read char is not Blank
 	 if (ch != '.')
 	 {
-            setCell(i,j,ch-'0');   // Convert char to int
+            setCell(i, j, ch-'0');   // Convert char to int
 	 }
       }
+   }
+}
+
+void board::setCell(int i, int j, char val)
+{
+  if (i >= 1 && i <= BoardSize && j >= 1 && j <= BoardSize)
+  {
+    value[i][j] = atoi(val);
+  }
+  else
+  {
+    throw rangeError("bad value in getCell");
+  }
 }
 
 ValueType board::getCell(int i, int j)
 // Returns the value stored in a cell.  Throws an exception
 // if bad values are passed.
 {
-   if (i >= 1 && i <= BoardSize && j >= 1 && j <= BoardSize)
-      return value[i][j];
-   else
-      throw rangeError("bad value in getCell");
+  if (i >= 1 && i <= BoardSize && j >= 1 && j <= BoardSize)
+  {
+    return value[i][j];
+  }
+  else
+  {
+    throw rangeError("bad value in getCell");
+  }
 }
 
 bool board::isBlank(int i, int j)
 // Returns true if cell i,j is blank, and false otherwise.
 {
-   if (i < 1 || i > BoardSize || j < 1 || j > BoardSize)
-      throw rangeError("bad value in setCell");
+  if (i < 1 || i > BoardSize || j < 1 || j > BoardSize)
+  {
+    throw rangeError("bad value in setCell");
+  }
+  if (value[i][j] == 0)
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
 }
 
 void board::print()
