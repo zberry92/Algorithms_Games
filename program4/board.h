@@ -28,13 +28,20 @@ const int MinValue = 1;
 const int MaxValue = 9;
 int numSolutions = 0;
 
-// Overloaded output operator for vector class.
+// Overloaded output operator to print the conflict vectors.
 template <typename T>
 ostream &operator<<(ostream &oStr, vector<T> &v)
 {
   for (int i = 1; i < v.size(); i++)
   {
-    oStr <<v[i] <<" ";
+    if (v[i])
+    {
+      oStr <<"T ";
+    }
+    else
+    {
+      oStr <<"F ";
+    }
   }
   
   oStr <<endl;
@@ -45,7 +52,7 @@ ostream &operator<<(ostream &oStr, vector<T> &v)
 class board
 {
    public:
-      board(int sqSize);
+      board();
       void clear();
       void initialize(ifstream &fin);
       bool checkConflicts(int i, int j, int k, int val);
@@ -71,7 +78,7 @@ class board
 };
 
 // Board Constructor
-board::board(int sqSize)
+board::board()
      : value(BoardSize + 1, BoardSize + 1), 
        rowConf(10, vector<bool>(10, false)),
        colConf(10, vector<bool>(10, false)), 
@@ -88,7 +95,9 @@ void board::clear()
     {
       value[i][j] = -1;
     }
-  }	
+  }
+
+  clearConflicts();
 }
 
 // Read the board in from the input file.
@@ -106,7 +115,7 @@ void board::initialize(ifstream &fin)
          // If the read char is not Blank
 	 if (ch != '.')
 	 {
-            setCell(i, j, ch);   // Convert char to int
+	   setCell(i, j, ch);   // Convert char to int
 	 }
 	 else
 	 {
@@ -119,6 +128,12 @@ void board::initialize(ifstream &fin)
 // checkConflicts will see if the letter is allowed to be placed there.
 bool board::checkConflicts(int val, int i, int j, int k)
 {
+  if (i < 1 && i > BoardSize && j < 1 && j > BoardSize &&
+      k < 1 && k > BoardSize && val < 1 && val > BoardSize)
+  {
+    throw rangeError("bad value in checkConflicts()");
+  }
+
   if (rowConf[i][val] || colConf[j][val] || squConf[k][val])
   {
     return false;
@@ -134,10 +149,14 @@ void board::setCell(int i, int j, char val)
 {
   int intVal;
 
-  if (i >= 1 && i <= BoardSize && j >= 1 && j <= BoardSize)
+  intVal = atoi(&val);
+
+  if (i >= 1 && i <= BoardSize && j >= 1 && j <= BoardSize &&
+      intVal >= 1 && intVal <= BoardSize)
   {
-    intVal = atoi(&val);
     value[i][j] = intVal;
+    
+    // Set flags of the conflicts
     rowConf[i][intVal] = true;
     colConf[j][intVal] = true;
     squConf[squareNumber(i, j)][intVal] = true;
@@ -148,11 +167,21 @@ void board::setCell(int i, int j, char val)
   }
 }
 
+// clearCell() will clear the value of the cell and update conflicts.
 void board::clearCell(int i, int j)
 {
+  int intVal;
+
   if (i >= 1 && i <= BoardSize && j >= 1 && j <= BoardSize)
   {
-    value[i][j] = -1;
+    if (value[i][j] != -1)
+    {
+      intVal = value[i][j];
+      rowConf[i][intVal] = false;
+      colConf[j][intVal] = false;
+      squConf[squareNumber(i, j)][intVal] = false;
+      value[i][j] = -1;
+    }
   }
   else
   {
@@ -301,6 +330,7 @@ bool board::isSolved()
   return true;
 }
 
+// clearConflicts() will reset all of the conflict vectors to false.
 void board::clearConflicts()
 {
   for (int i = 1; i <= BoardSize; i++)

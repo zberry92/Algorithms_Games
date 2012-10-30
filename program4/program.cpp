@@ -13,13 +13,12 @@ using namespace std;
 int main()
 {
   ifstream fin;
-  int i, j, k, count = 1, choice;
-  
-  // Read the sample grid from the file.
+  int i, j, count = 0, choice;
+  char k;
   string fileName = "sudoku.txt";
   
+  // Open the sudoku file
   fin.open(fileName.c_str());
-  
   if (fin == NULL)
   {
     cerr << "Cannot open " << fileName << endl;
@@ -28,16 +27,19 @@ int main()
   
   try
   {
-    board b1(SquareSize);
+    board b1;
     
     while (fin && fin.peek() != 'Z')
     {
-      b1.clearConflicts();
+      count++;
       cout <<"Board " <<count <<endl;
+      
+      b1.clearConflicts(); //Remove conflicts from the previous board.
       b1.initialize(fin);
       b1.printBoard();
       b1.printConflicts();
       
+      // Check to see if the board is solved. If it is move to next board.
       if (b1.isSolved())
       {
 	cout <<"Congratulations! The board has been solved!!" <<endl;
@@ -47,48 +49,64 @@ int main()
       {
 	cout <<"The board is not yet solved." <<endl;
       }
-      count++;
-      
-      cout <<"Please enter '1' to add a value, '0' to delete a value " <<endl
-	   <<"and '-1' to print the next board: ";
-      cin >>choice;
 
-      if (choice == 1)
+      // While loop to add or remove values from the board until the user enters -1.
+      while (choice != -1)
       {
-	cout <<"Please enter the value you wish to add: ";
-	cin >>k;
-        cout <<"X-coordinate: ";
-        cin >>i;
-	cout <<"Y-coordinate: ";
-	cin >>j;
-
-	if (b1.checkConflicts(k, i, j, b1.squareNumber(i, j)))
+	cout <<"Please enter '1' to add a value, '0' to delete a value " <<endl
+	     <<"and '-1' to print the next board: ";
+	cin >>choice;
+	
+	// Add a number to the matrix
+	if (choice == 1)
 	{
-	  b1.setCell(i, j, k);
+	  cout <<"Please enter the value you wish to add: ";
+	  cin >>k;
+	  cout <<"X-coordinate: ";
+	  cin >>i;
+	  cout <<"Y-coordinate: ";
+	  cin >>j;
+	  
+	  if (b1.checkConflicts(atoi(&k), i, j, b1.squareNumber(i, j)))
+	  {
+	    b1.setCell(i, j, k);
+	    b1.printBoard();
+	    b1.printConflicts();
+	    if (b1.isSolved())
+	    {
+	      cout <<"Congratulations! The board has been solved!!" <<endl;
+	      continue;
+	    }
+	    else
+	    {
+	      cout <<"The board is not yet solved." <<endl;
+	    }
+	  }
+	  else
+	  {
+	    cout <<"You cannot place a number there, there is a conflict." <<endl; 
+	  }
+	}
+
+	// Remove a number from a cell.
+	else if (choice == 0)
+	{
+	  cout <<"Please enter the X-coordinate you wish to delete: ";
+	  cin >>i;
+	  cout <<"Y-coordinate: ";
+	  cin >>j;
+	  b1.clearCell(i, j);
+	  b1.printBoard();
+	  b1.printConflicts();
 	}
 	else
-	{
-	  cout <<"You cannot place a number there, there is a conflict." <<endl;
+        {
+	  cout <<"Please enter a correct value!" <<endl;
 	}
-	b1.printBoard();
-	b1.printConflicts();
       }
-      else if (choice == 0)
-      {
-	cout <<"Please enter the X-coordinate you wish to delete: ";
-	cin >>i;
-	cout <<"Y-coordinate: ";
-	cin >>j;
-	b1.clearCell(i, j);
-	b1.printBoard();
-	b1.printConflicts();
-      }
-      else
-      {
-	continue;
-      }	
     }
   }
+
   catch (indexRangeError &ex)
   {
     cout << ex.what() << endl;
