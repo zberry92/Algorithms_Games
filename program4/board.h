@@ -34,10 +34,7 @@ ostream &operator<<(ostream &oStr, vector<T> &v)
 {
   for (int i = 1; i < v.size(); i++)
   {
-    for (int j = 1; j < v.size(); j++)
-    {
-      oStr <<v[i][j] <<" ";
-    }
+    oStr <<v[i] <<" ";
   }
   
   oStr <<endl;
@@ -54,12 +51,14 @@ class board
       bool checkConflicts(int i, int j, int k, int val);
       void findConflicts();
       void setCell(int i, int j, char val);
+      void clearCell(int i, int j);
       ValueType getCell(int, int);
       bool isBlank(int i, int j);
       void printBoard();
       void printConflicts();
       int squareNumber(int i, int j);
       bool isSolved();
+      void clearConflicts();
       
    private:
       // The following matrices go from 1 to BoardSize in each
@@ -149,6 +148,18 @@ void board::setCell(int i, int j, char val)
   }
 }
 
+void board::clearCell(int i, int j)
+{
+  if (i >= 1 && i <= BoardSize && j >= 1 && j <= BoardSize)
+  {
+    value[i][j] = -1;
+  }
+  else
+  {
+    throw rangeError("bad value in setCell");
+  }
+}
+
 // getCell() returns the value of a cell and throws an exception 
 // if bad parameters.
 ValueType board::getCell(int i, int j)
@@ -226,20 +237,23 @@ void board::printBoard()
 
 void board::printConflicts()
 {
-  cout <<"Row Conflicts:" <<endl 
-       <<"Rows:   1 2 3 4 5 6 7 8 9" <<endl
-       <<"Values: ";
-  cout <<rowConf;
+  for (int i = 1; i <= BoardSize; i++)
+  {
+    cout <<"Row " <<i <<" Conflicts:" <<endl 
+	 <<"Numbers: 1 2 3 4 5 6 7 8 9" <<endl
+	 <<"Values:  ";
+    cout <<rowConf[i] <<endl;
 
-  cout <<"Column Conflicts:" <<endl 
-       <<"Columns: 1 2 3 4 5 6 7 8 9" <<endl
-       <<"Values:  ";
-  cout <<colConf;
+    cout <<"Column " <<i <<" Conflicts:" <<endl 
+	 <<"Numbers: 1 2 3 4 5 6 7 8 9" <<endl
+	 <<"Values:  ";
+    cout <<colConf[i] <<endl;
 
-  cout <<"Square Conflicts:" <<endl 
-       <<"Squares: 1 2 3 4 5 6 7 8 9" <<endl
-       <<"Values:  ";
-  cout <<squConf;
+    cout <<"Square " <<i<<" Conflicts:" <<endl 
+	 <<"Numbers: 1 2 3 4 5 6 7 8 9" <<endl
+	 <<"Values:  ";
+    cout <<squConf[i] <<endl;
+  }
 }
 
 // squareNumber() returns the square number of cell i,j 
@@ -285,6 +299,19 @@ bool board::isSolved()
   }
   
   return true;
+}
+
+void board::clearConflicts()
+{
+  for (int i = 1; i <= BoardSize; i++)
+  {
+    for (int j = 1; j <= BoardSize; j++)
+    {
+      rowConf[i][j] = false;
+      colConf[i][j] = false;
+      squConf[i][j] = false;
+    }
+  }
 }
 
 #endif
