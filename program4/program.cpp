@@ -10,46 +10,39 @@
 
 using namespace std;
 
-// Overloaded output operator for vector class.
-ostream &operator<<(ostream &oStr, vector<int> &v)
-{
-   for (int i = 0; i < v.size(); i++)
-   {
-	  oStr <<v[i] <<" ";
-   }
-   
-   oStr <<endl;
-   return oStr;
-}
-
 int main()
 {
-   ifstream fin;
-   
-   // Read the sample grid from the file.
-   string fileName = "sudoku.txt";
-   
-   fin.open(fileName.c_str());
-   {
-	  cerr << "Cannot open " << fileName << endl;
-	  exit(1);
-   }
+  ifstream fin;
   
-   try
-   {
-	  board b1(SquareSize);
-		
-	  while (fin && fin.peek() != 'Z')
-	  {
-		 b1.initialize(fin);
-		 b1.print();
-		 b1.printConflicts();
-	  }
-   }
-   catch  (indexRangeError &ex)
-   {
-	  cout << ex.what() << endl;
-	  exit(1);
-   }
+  // Read the sample grid from the file.
+  string fileName = "sudoku.txt";
+  
+  fin.open(fileName.c_str());
+  
+  if (fin == NULL)
+  {
+    cerr << "Cannot open " << fileName << endl;
+    exit(1);
+  }
+  
+  try
+  {
+    board b1(SquareSize);
+    
+    while (fin && fin.peek() != 'Z')
+    {
+      b1.initialize(fin);
+      b1.printBoard();
+      b1.printConflicts();
+    }
+  }
+  catch (indexRangeError &ex)
+  {
+    cout << ex.what() << endl;
+    exit(1);
+  }
+
+  fin.close();
+  return 0;
 }
 
