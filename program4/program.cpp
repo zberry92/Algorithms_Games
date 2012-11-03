@@ -1,9 +1,8 @@
 /*
  * Zachary Berry & Patrick Willet (berwil)
  * 10/28/12
- * Program 4a
- * This program will load in sudoku boards and print out the boards and their 
- * conflicts if any exist.
+ * Program 4b
+ * This program will solve the sudoku boards in the sudoku.txt file.
  */
 
 #include "board.h"
