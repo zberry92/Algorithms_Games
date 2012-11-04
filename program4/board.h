@@ -273,7 +273,7 @@ void board::printBoard()
 
 void board::printConflicts()
 {
-  for (int i = 1; i <= BoardSize; i++)
+  for (int i = 1; i <= 2; i++)
   {
     cout <<"Row " <<i <<" Conflicts:" <<endl 
 	 <<"Numbers: 1 2 3 4 5 6 7 8 9" <<endl
@@ -380,6 +380,9 @@ bool board::solveBoard(int i, int j, int count)
     {
       if (setCell(i, j, (char)n + '0'))
       {
+	printBoard();
+	printConflicts();
+	cout<<endl <<endl;
 	if (solveBoard(i, j + 1, count + 1))
 	{
 	  return true;
@@ -393,6 +396,7 @@ bool board::solveBoard(int i, int j, int count)
   }
 
   clearCell(i, j);
+  cout<< rowConf[i] <<endl <<colConf[j] <<endl;
   return false;
 }
 
