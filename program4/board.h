@@ -56,7 +56,7 @@ class board
       void clearBoard();
       void initialize(ifstream &fin);
       bool checkConflicts(int i, int j, int k, int val);
-      void setCell(int i, int j, char val);
+      bool setCell(int i, int j, char val);
       void clearCell(int i, int j);
       ValueType getCell(int i, int j);
       bool isBlank(int i, int j);
@@ -66,6 +66,7 @@ class board
       bool isSolved();
       void clearConflicts();
       bool findMin(int i, int j, int maxI, int maxJ, int &minI, int &minJ);
+      bool solveBoard(int i, int k, int count);
       
    private:
       // The following matrices go from 1 to BoardSize in each
@@ -104,7 +105,7 @@ void board::initialize(ifstream &fin)
 {
    char ch;
 
-   clear();
+   clearBoard();
    for (int i = 1; i <= BoardSize; i++)
    {
       for (int j = 1; j <= BoardSize; j++)
@@ -144,7 +145,7 @@ bool board::checkConflicts(int val, int i, int j, int k)
 }
 
 // setCell will set the value of the cell and update conflicts.
-void board::setCell(int i, int j, char val)
+bool board::setCell(int i, int j, char val)
 {
   int intVal;
 
@@ -153,12 +154,19 @@ void board::setCell(int i, int j, char val)
   if (i >= 1 && i <= BoardSize && j >= 1 && j <= BoardSize &&
       intVal >= 1 && intVal <= BoardSize)
   {
+    if (!(checkConflicts(intVal, i, j, squareNumber(i, j))))
+    {
+	return false;
+    }
+
     value[i][j] = intVal;
     
     // Set flags of the conflicts
     rowConf[i][intVal] = true;
     colConf[j][intVal] = true;
     squConf[squareNumber(i, j)][intVal] = true;
+
+    return true;
   }
   else
   {
@@ -341,6 +349,51 @@ void board::clearConflicts()
       squConf[i][j] = false;
     }
   }
+}
+
+bool board::solveBoard(int i, int j, int count)
+{
+
+  if (j > 9)
+  {
+    j = 1;
+    i++;
+  
+    if (i > 3)
+      {
+	cout <<"Pause";
+      }
+
+    printBoard();
+    if (isSolved())
+    {
+      printBoard();
+      cout <<"The Board has been solved!" <<endl
+           <<" The number of recursive calls was: " <<count <<endl;
+      return true;
+    }
+  }
+
+  if (isBlank(i, j))
+  {
+    for (int n = 1; n < 10; n++)
+    {
+      if (setCell(i, j, (char)n + '0'))
+      {
+	if (solveBoard(i, j + 1, count + 1))
+	{
+	  return true;
+	}
+      }
+    }
+  }
+  else
+  {
+    return (solveBoard(i, j + 1, count + 1));
+  }
+
+  clearCell(i, j);
+  return false;
 }
 
 #endif

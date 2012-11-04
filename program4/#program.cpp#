@@ -37,7 +37,6 @@ int main()
       b1.initialize(fin);
       b1.printBoard();
       b1.printConflicts();
-      b1.solveBoard(1, 1, 0);
       
       // Check to see if the board is solved. If it is move to next board.
       if (b1.isSolved())
