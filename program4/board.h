@@ -62,6 +62,7 @@ class board
       bool isBlank(int i, int j);
       void printBoard();
       void printConflicts();
+      void rintConflicts();
       int squareNumber(int i, int j);
       bool isSolved();
       void clearConflicts();
