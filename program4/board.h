@@ -66,6 +66,7 @@ class board
       bool isSolved();
       void clearConflicts();
       bool findMin(int i, int j, int maxI, int maxJ, int &minI, int &minJ);
+      bool solveBoard(
       
    private:
       // The following matrices go from 1 to BoardSize in each
