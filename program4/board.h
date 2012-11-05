@@ -56,7 +56,7 @@ class board
       void clearBoard();
       void initialize(ifstream &fin);
       bool checkConflicts(int i, int j, int k, int val);
-      void setCell(int i, int j, char val);
+      bool setCell(int i, int j, char val);
       void clearCell(int i, int j);
       ValueType getCell(int i, int j);
       bool isBlank(int i, int j);
@@ -65,8 +65,9 @@ class board
       int squareNumber(int i, int j);
       bool isSolved();
       void clearConflicts();
-      bool findMin(int i, int j, int maxI, int maxJ, int &minI, int &minJ);
-      bool solveBoard(
+      int getNumConf(int i, int j);
+      void findMin(int &i, int &j);
+      bool solveBoard(int &count);
       
    private:
       // The following matrices go from 1 to BoardSize in each
@@ -105,7 +106,7 @@ void board::initialize(ifstream &fin)
 {
    char ch;
 
-   clear();
+   clearBoard();
    for (int i = 1; i <= BoardSize; i++)
    {
       for (int j = 1; j <= BoardSize; j++)
@@ -133,7 +134,7 @@ bool board::checkConflicts(int val, int i, int j, int k)
   {
     throw rangeError("bad value in checkConflicts()");
   }
-
+  
   if (rowConf[i][val] || colConf[j][val] || squConf[k][val])
   {
     return false;
@@ -145,7 +146,7 @@ bool board::checkConflicts(int val, int i, int j, int k)
 }
 
 // setCell will set the value of the cell and update conflicts.
-void board::setCell(int i, int j, char val)
+bool board::setCell(int i, int j, char val)
 {
   int intVal;
 
@@ -154,12 +155,19 @@ void board::setCell(int i, int j, char val)
   if (i >= 1 && i <= BoardSize && j >= 1 && j <= BoardSize &&
       intVal >= 1 && intVal <= BoardSize)
   {
+    if (!(checkConflicts(intVal, i, j, squareNumber(i, j))))
+    {
+	return false;
+    }
+
     value[i][j] = intVal;
     
     // Set flags of the conflicts
     rowConf[i][intVal] = true;
     colConf[j][intVal] = true;
     squConf[squareNumber(i, j)][intVal] = true;
+
+    return true;
   }
   else
   {
@@ -297,30 +305,11 @@ int board::squareNumber(int i, int j)
 // isSolved() will return true if the board is solved and false oetherwise.
 bool board::isSolved()
 {
-  int tempInt;
-
-  for (int i = 1; i <= BoardSize + 1; i++)
+  for (int i = 1; i <= BoardSize; i++)
   {
-    for (int j = 1; j <= BoardSize + 1; j++)
+    for (int j = 1; j <= BoardSize; j++)
     {
-      if (i % 3 == 0 && j % 3 == 0)
-      {
-	tempInt = squareNumber(i, j);
-	for (int k = 1; k <= BoardSize; k++)
-	{
-	  if (!(squConf[tempInt][k]))
-	  {
-	    return false;
-	  }
-	}
-      }
-
-      if (!(rowConf[i][j]))
-      {
-	return false;
-      }
-
-      if (!(colConf[i][j]))
+      if (getCell(i, j) == -1)
       {
 	return false;
       }
@@ -328,6 +317,55 @@ bool board::isSolved()
   }
   
   return true;
+}
+
+int board::getNumConf(int i, int j)
+{
+  int count = 0;
+
+  for (int x = 1; x <= BoardSize; x++)
+  {
+    if (rowConf[i][x] || colConf[j][x] || squConf[squareNumber(i, j)][x])
+      count++;
+  }
+
+  return count;
+}  
+
+void board::findMin(int &i, int &j)
+{
+  int tempCount = 0, currLow = 9;
+  
+  i = 1; 
+  j = 1;
+
+  for (int a = 1; a <= BoardSize; a++)
+  {
+    for (int b = 1; b <= BoardSize; b++)
+    {
+      if (isBlank(a, b))
+      {
+	tempCount = getNumConf(a, b);
+	if (tempCount < 2)
+	{
+	  continue;
+	}
+	else if (tempCount == 2)
+	{
+	  i = a;
+	  j = b;
+	  return;
+	}
+	else if (tempCount < currLow)
+	{
+	  currLow = tempCount;
+	  i = a;
+	  j = b;
+	}
+      }
+    }
+  }
+  return;
 }
 
 // clearConflicts() will reset all of the conflict vectors to false.
@@ -344,5 +382,36 @@ void board::clearConflicts()
   }
 }
 
+bool board::solveBoard(int &count)
+{
+  int i, j;
+
+  count++;
+  
+  if (isSolved())
+  {
+    printBoard();
+    cout <<"The Board has been solved!" <<endl
+	 <<" The number of recursive calls was: " <<count <<endl;
+    return true;
+  }
+
+  findMin(i, j);
+
+  for (int n = 1; n <= BoardSize; n++)
+  {
+    if (setCell(i, j, (char)n + '0'))
+    {
+      printBoard();
+      if (solveBoard(count))
+      {
+	return true;
+      }
+      clearCell(i, j);
+    }
+  }
+
+  return false;
+}
 #endif
 
