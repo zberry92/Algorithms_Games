@@ -320,6 +320,7 @@ bool board::isSolved()
   return true;
 }
 
+// getNumConf returns the number of possible values.
 int board::getNumConf(int i, int j)
 {
   int count = 0;
@@ -330,15 +331,13 @@ int board::getNumConf(int i, int j)
       count++;
   }
 
-  return count;
+  return (9 - count);
 }  
 
+//findMin() ill find the number with the minimum numberof conflicts.
 void board::findMin(int &i, int &j)
 {
-  int tempCount = 0, currLow = 9;
-  
-  i = 1; 
-  j = 1;
+  int tempCount = 0, currLow = 10;
 
   for (int a = 1; a <= BoardSize; a++)
   {
@@ -347,11 +346,7 @@ void board::findMin(int &i, int &j)
       if (isBlank(a, b))
       {
 	tempCount = getNumConf(a, b);
-	if (tempCount < 2)
-	{
-	  continue;
-	}
-	else if (tempCount == 2)
+	if (tempCount == 1)
 	{
 	  i = a;
 	  j = b;
@@ -383,6 +378,8 @@ void board::clearConflicts()
   }
 }
 
+// solveBoard() will solve the sudok board and print the solution and
+// number of recursive calls made.
 bool board::solveBoard(int &count)
 {
   int i, j;
@@ -393,7 +390,7 @@ bool board::solveBoard(int &count)
   {
     printBoard();
     cout <<"The Board has been solved!" <<endl
-	 <<" The number of recursive calls was: " <<count <<endl;
+	 <<"The number of recursive calls was: " <<count <<endl;
     return true;
   }
 
@@ -403,7 +400,6 @@ bool board::solveBoard(int &count)
   {
     if (setCell(i, j, (char)n + '0'))
     {
-      printBoard();
       if (solveBoard(count))
       {
 	return true;

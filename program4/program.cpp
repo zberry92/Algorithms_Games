@@ -12,8 +12,7 @@ using namespace std;
 int main()
 {
   ifstream fin;
-  int i, j, count = 0, choice, c2 = 0;
-  char k;
+  int count = 0, c2 = 0, totalRecursive = 0;
   string fileName = "sudoku.txt";
   
   // Open the sudoku file
@@ -31,14 +30,19 @@ int main()
     while (fin && fin.peek() != 'Z')
     {
       count++;
+      c2 = 0; // Reset recurive count
       cout <<"Board " <<count <<endl;
       
       b1.clearConflicts(); //Remove conflicts from the previous board.
       b1.initialize(fin);
       b1.printBoard();
-      b1.printConflicts();
       b1.solveBoard(c2);
+      totalRecursive += c2;
     }
+
+    cout <<"All boards have been solved!" <<endl
+	 <<"The avergae number of recusrive calls was: " 
+	 <<(totalRecursive/96) <<endl;
   }
 
   catch (indexRangeError &ex)
