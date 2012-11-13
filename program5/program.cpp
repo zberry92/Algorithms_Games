@@ -10,6 +10,7 @@
 
 using namespace std;
 
+// Depth-first search recursively
 bool findPathRecursive(graph &g, int begin, int end, vector<int> &sol)
 {
   g.visit(begin);
@@ -36,6 +37,7 @@ bool findPathRecursive(graph &g, int begin, int end, vector<int> &sol)
   return false;
 }
 
+// Non-recursive depth-first search
 void findPathNonRecursive(graph &g, int end, vector<int> &sol)
 {
   int begin = 0;
@@ -60,10 +62,10 @@ void findPathNonRecursive(graph &g, int end, vector<int> &sol)
     if (begin == end)
       return;
 
-    for (int i = 0; i <= end; i ++)
+    for (int i = 0; i <= end; i++)
     {
       if ((i == begin) || g.isVisited(i) || !g.isEdge(begin, i) || g.isMarked(i))
-	continue;
+		continue;
       sol.push_back(i);
       g.visit(i);
       nextSteps = true;
@@ -79,13 +81,12 @@ void findPathNonRecursive(graph &g, int end, vector<int> &sol)
   }
 }
 
-
-
+// Print instructions to the user.
 void printResult(vector<int> temp)
 {
   cout <<"To solve the maze you go from: ";
 
-  for (int i = 0; i < temp.size(); i++)
+  for (int i = 0; i < (int) temp.size(); i++)
   {
     cout <<"node " <<temp[i];
     if (i != temp.size() - 1)
@@ -98,12 +99,12 @@ void printResult(vector<int> temp)
 int main()
 {
    ifstream fin;
-   string fileName = "maze1.txt";
+   string fileName;
    graph ourGraph; 
    vector<int> recSolution, nonRecSolution(1, 0);
 
    cout <<"Please enter the name of the maze file: ";
-   //cin >>fileName;
+   cin >>fileName;
 
    fin.open(fileName.c_str());
    if (!fin)
@@ -123,21 +124,27 @@ int main()
      if (!findPathRecursive(ourGraph, 0, ourMaze.endId(), recSolution))
        cout <<"There are no solutions to the puzzle" <<endl;
      printResult(recSolution);
+	 ourGraph.clearVisit();
 
      // Non-recursively
      cout <<"Non-recursive method: " <<endl;
      findPathNonRecursive(ourGraph, ourMaze.endId(), nonRecSolution);
      printResult(nonRecSolution);
-     
+	 ourGraph.clearVisit();
    } 
+
    catch (indexRangeError &ex) 
    { 
       cout << ex.what() << endl;
       return 0;
    }
+
    catch (rangeError &ex)
    {
       cout << ex.what() << endl;
       return 0;
    }
+
+   system("Pause");
+   return 0;
 }
