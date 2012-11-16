@@ -85,15 +85,44 @@ void findPathNonRecursive(graph &g, int end, vector<int> &sol)
 }
 
 // Print instructions to the user.
-void printResult(vector<int> temp)
+void printResult(maze &m, vector<int> temp)
 {
-  cout <<"To solve the maze you go from: ";
+  int i, prevI, j, prevJ;
 
-  for (int i = 0; i < (int) temp.size(); i++)
+  prevI = m.reverseMapIdI(temp[0]);
+  prevJ = m.reverseMapIdJ(temp[0]);
+
+  cout <<"To solve the maze from the start: ";
+
+  for (int x = 1; x < (int) temp.size(); x++)
   {
-    cout <<"node " <<temp[i];
-    if (i != temp.size() - 1)
-      cout <<" to ";
+    i = m.reverseMapIdI(temp[x]);
+    j = m.reverseMapIdJ(temp[x]);
+    
+    if (prevI > i)
+    {
+      cout <<"move up";
+    }
+    else if (prevI < i)
+    {
+      cout <<"move down";
+    }
+    else if (prevJ > j)
+    {
+      cout <<"move to the left";
+    }
+    else if (prevJ < j)
+    {
+      cout <<"move to the right";
+    }
+
+    if (x != temp.size() - 1)
+    {
+      cout <<", then ";
+    }
+
+    prevI = i;
+    prevJ = j;
   }
 
   cout <<endl <<endl;
@@ -130,14 +159,14 @@ int main()
      }
      else
      {
-       printResult(recSolution);
+       printResult(ourMaze, recSolution);
        ourGraph.clearVisit();
      }
 
      // Non-recursively
      cout <<"Non-recursive method: " <<endl;
      findPathNonRecursive(ourGraph, ourMaze.endId(), nonRecSolution);
-     printResult(nonRecSolution);
+     printResult(ourMaze, nonRecSolution);
      ourGraph.clearVisit();
    } 
 
