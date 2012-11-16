@@ -16,9 +16,12 @@ class maze
 
       int numRows(){return rows;};
       int numCols(){return cols;};
+
+      int reverseMapIdI(int id);
+      int reverseMapIdJ(int id);
       int endId(){return mazeGrid[rows - 1][cols - 1];};
 
-      void printMaze();
+      void printMaze(int currI, int currJ, int goalI, int goalJ);
       bool isLegal(int i, int j);
 
       void mapMazeToGraph(graph &g);
@@ -28,6 +31,8 @@ class maze
       int cols; // number of columns in the maze
 
       matrix<int> mazeGrid;
+      vector<int> idI;
+      vector<int> idJ;
 };
 
 maze::maze(ifstream &fin)
@@ -49,6 +54,8 @@ maze::maze(ifstream &fin)
       if (x == 'O')
       {
 	mazeGrid[i][j] = idVal;
+	idI.push_back(i);
+	idJ.push_back(j);
 	idVal++;
       }      
       else
@@ -59,25 +66,46 @@ maze::maze(ifstream &fin)
   }
 }
 
-void maze::printMaze()
+int maze::reverseMapIdI(int id)
+{
+  return idI[id];
+}
+
+int maze::reverseMapIdJ(int id)
+{
+  return idJ[id];
+}
+
+void maze::printMaze(int currI, int currJ, int goalI, int goalJ)
 // Print out a maze, with the goal and current cells marked on the
 // board.
 {
-   cout <<endl;
-
-   for (int i = 0; i <= rows - 1; i++)
-   {
-      for (int j = 0; j <= cols - 1; j++)
-      {
-	cout <<mazeGrid[i][j];
-	if (mazeGrid[i][j] < 10 && mazeGrid[i][j] > -1)
-	  cout <<"  ";
+  cout << endl;
+	
+  if (goalI < 0 || goalI > rows || goalJ < 0 || goalJ > cols)	
+    throw rangeError("Bad value in maze::print");
+	
+  if (currI < 0 || currI > rows || currJ < 0 || currJ > cols)
+    throw rangeError("Bad value in maze::print");
+	
+  for (int i = 0; i <= rows-1; i++)	
+  {
+    for (int j = 0; j <= cols-1; j++)	
+    {	
+      if (i == goalI && j == goalJ)	
+	cout << "*";
+      else
+	if (i == currI && j == currJ)
+	  cout << "+";
 	else
-	  cout <<" ";
-      }
-      cout <<"|" <<endl;
-   }
-   cout <<endl;
+	  if (mazeGrid[i][j] != -1)	
+	    cout << " ";	
+	  else	
+	    cout << "X";    	
+    }
+    cout << endl;
+  }
+  cout << endl;
 }
 
 bool maze::isLegal(int i, int j)

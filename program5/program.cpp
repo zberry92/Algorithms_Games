@@ -10,11 +10,14 @@
 
 using namespace std;
 
-// Depth-first search recursively
-bool findPathRecursive(graph &g, int begin, int end, vector<int> &sol)
+// Depth-first search find the shortest path
+bool findPathDepth(graph &g, maze &m, int begin, int end, vector<int> &sol)
 {
   g.visit(begin);
   sol.push_back(begin);
+
+  m.printMaze(m.reverseMapIdI(begin), m.reverseMapIdJ(begin), 
+	      m.numRows() - 1, m.numCols() - 1);
   if (begin == end)
   {
     return true;
@@ -26,7 +29,7 @@ bool findPathRecursive(graph &g, int begin, int end, vector<int> &sol)
     {
       continue;
     }
-    if (findPathRecursive(g, i, end, sol))
+    if (findPathDepth(g, m, i, end, sol))
     {
       return true;
     }
@@ -37,7 +40,7 @@ bool findPathRecursive(graph &g, int begin, int end, vector<int> &sol)
   return false;
 }
 
-// Non-recursive depth-first search
+// Non-recursive depth-first search ***Not in use for 5b***
 void findPathNonRecursive(graph &g, int end, vector<int> &sol)
 {
   int begin = 0;
@@ -116,21 +119,26 @@ int main()
    try
    {
      maze ourMaze(fin); 
-     ourMaze.printMaze();
+     // ourMaze.printMaze();
      ourMaze.mapMazeToGraph(ourGraph);
      
      // Find a path recursively
      cout <<"Recursive method: " <<endl;
-     if (!findPathRecursive(ourGraph, 0, ourMaze.endId(), recSolution))
+     if (!findPathDepth(ourGraph, ourMaze, 0, ourMaze.endId(), recSolution))
+     {
        cout <<"There are no solutions to the puzzle" <<endl;
-     printResult(recSolution);
-	 ourGraph.clearVisit();
+     }
+     else
+     {
+       printResult(recSolution);
+       ourGraph.clearVisit();
+     }
 
      // Non-recursively
      cout <<"Non-recursive method: " <<endl;
      findPathNonRecursive(ourGraph, ourMaze.endId(), nonRecSolution);
      printResult(nonRecSolution);
-	 ourGraph.clearVisit();
+     ourGraph.clearVisit();
    } 
 
    catch (indexRangeError &ex) 
@@ -145,6 +153,5 @@ int main()
       return 0;
    }
 
-   system("Pause");
    return 0;
 }
