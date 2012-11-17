@@ -7,6 +7,7 @@
  */
 
 #include "maze.h"
+#include <queue>
 
 using namespace std;
 
@@ -47,9 +48,9 @@ bool findPathBreadth(graph &g, maze &m, int end, vector<int> &s)
 	vector<int> shortPath, tempPath;
 	
 	pathQueue.push(vector<int>(1, 0));
-	g.vist(0);
+	g.visit(0);
 	
-	while(!q.empty())
+	while(!pathQueue.empty())
 	{
 		shortPath = pathQueue.front();
 		pathQueue.pop();
@@ -62,7 +63,7 @@ bool findPathBreadth(graph &g, maze &m, int end, vector<int> &s)
 		
 		for (int i = 0; i <= end; i++)
 		{
-			if ((i == path.back()) || g.isVisited(i) || !g.isEdge(shortPath.back(), i))
+			if ((i == shortPath.back()) || g.isVisited(i) || !g.isEdge(shortPath.back(), i))
 			{
 				continue;
 			}
@@ -201,8 +202,8 @@ int main()
      }
 
      // Non-recursively
-     cout <<"Non-recursive method: " <<endl;
-     findPathNonRecursive(ourGraph, ourMaze.endId(), nonRecSolution);
+     cout <<"Breadth method: " <<endl;
+     findPathBreadth(ourGraph, ourMaze, ourMaze.endId(), nonRecSolution);
      printResult(ourMaze, nonRecSolution);
      ourGraph.clearVisit();
    } 
