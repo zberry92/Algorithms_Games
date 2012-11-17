@@ -17,7 +17,8 @@ bool findPathDepth(graph &g, maze &m, int begin, int end, vector<int> &sol)
   sol.push_back(begin);
 
   m.printMaze(m.reverseMapIdI(begin), m.reverseMapIdJ(begin), 
-	      m.numRows() - 1, m.numCols() - 1);
+  m.numRows() - 1, m.numCols() - 1);
+
   if (begin == end)
   {
     return true;
@@ -38,6 +39,42 @@ bool findPathDepth(graph &g, maze &m, int begin, int end, vector<int> &sol)
   }
 
   return false;
+}
+
+bool findPathBreadth(graph &g, maze &m, int end, vector<int> &s)
+{
+	queue< vector<int> > pathQueue;
+	vector<int> shortPath, tempPath;
+	
+	pathQueue.push(vector<int>(1, 0));
+	g.vist(0);
+	
+	while(!q.empty())
+	{
+		shortPath = pathQueue.front();
+		pathQueue.pop();
+		
+		if (shortPath.back() == end)
+		{
+			s = shortPath;
+			return true;
+		}
+		
+		for (int i = 0; i <= end; i++)
+		{
+			if ((i == path.back()) || g.isVisited(i) || !g.isEdge(shortPath.back(), i))
+			{
+				continue;
+			}
+			
+			tempPath = shortPath;
+			tempPath.push_back(i);
+			g.visit(i);
+			pathQueue.push(tempPath);
+		}
+	}
+	
+	return false;
 }
 
 // Non-recursive depth-first search ***Not in use for 5b***
