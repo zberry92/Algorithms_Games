@@ -1,9 +1,9 @@
 /* 
  * Zachary Berry and Patrick Willett
  * 11/12/12
- * Project 5a
- * This project will find a solution to the map using a recursive and 
- * non-recursive depth-frst search.
+ * Project 5b
+ * This project will find the shortest solution to the map using dpeth-first and breadth-first
+ * search.
  */
 
 #include "maze.h"
@@ -18,7 +18,7 @@ bool findPathDepth(graph &g, maze &m, int begin, int end, vector<int> &sol)
   sol.push_back(begin);
 
   m.printMaze(m.reverseMapIdI(begin), m.reverseMapIdJ(begin), 
-  m.numRows() - 1, m.numCols() - 1);
+	      m.numRows() - 1, m.numCols() - 1);
 
   if (begin == end)
   {
@@ -31,12 +31,15 @@ bool findPathDepth(graph &g, maze &m, int begin, int end, vector<int> &sol)
     {
       continue;
     }
-    if (findPathDepth(g, m, i, end, sol))
+    else if (findPathDepth(g, m, i, end, sol))
     {
       return true;
     }
-    sol.pop_back();
-    g.unVisit(i);
+    else
+    {
+      sol.pop_back();
+      g.unVisit(i);
+    }
   }
 
   return false;
@@ -44,82 +47,42 @@ bool findPathDepth(graph &g, maze &m, int begin, int end, vector<int> &sol)
 
 bool findPathBreadth(graph &g, maze &m, int end, vector<int> &s)
 {
-	queue< vector<int> > pathQueue;
-	vector<int> shortPath, tempPath;
+  queue< vector<int> > pathQueue;
+  vector<int> shortPath, tempPath;
 	
-	pathQueue.push(vector<int>(1, 0));
-	g.visit(0);
-	
-	while(!pathQueue.empty())
-	{
-		shortPath = pathQueue.front();
-		pathQueue.pop();
-		
-		if (shortPath.back() == end)
-		{
-			s = shortPath;
-			return true;
-		}
-		
-		for (int i = 0; i <= end; i++)
-		{
-			if ((i == shortPath.back()) || g.isVisited(i) || !g.isEdge(shortPath.back(), i))
-			{
-				continue;
-			}
-			
-			tempPath = shortPath;
-			tempPath.push_back(i);
-			g.visit(i);
-			pathQueue.push(tempPath);
-		}
-	}
-	
-	return false;
-}
-
-// Non-recursive depth-first search ***Not in use for 5b***
-void findPathNonRecursive(graph &g, int end, vector<int> &sol)
-{
-  int begin = 0;
-  bool nextSteps;
-
-  cout <<end;
-
-  g.visit(begin);
+  pathQueue.push(vector<int>(1, 0));
+  g.visit(0);
   
-  while (true)
+  while(!pathQueue.empty())
   {
-    nextSteps = false;
-    if (sol.empty())
+    shortPath = pathQueue.front();
+    pathQueue.pop();
+		
+    if (shortPath.back() == end)
     {
-      begin = 0;
+      s = shortPath;
+      return true;
     }
-    else
-    {
-      begin = sol.back();
-    }
-
-    if (begin == end)
-      return;
-
+    
     for (int i = 0; i <= end; i++)
     {
-      if ((i == begin) || g.isVisited(i) || !g.isEdge(begin, i) || g.isMarked(i))
-		continue;
-      sol.push_back(i);
-      g.visit(i);
-      nextSteps = true;
-      break;
-    }
+      if ((i == shortPath.back()) || g.isVisited(i) || 
+	  !g.isEdge(shortPath.back(), i))
+      {
+	continue;
+      }
 
-    if (!nextSteps)
-    {
-      sol.pop_back();
-      g.mark(begin);
-      g.unVisit(begin);
+      m.printMaze(m.reverseMapIdI(i), m.reverseMapIdJ(i), 
+		  m.numRows() - 1, m.numCols() - 1);
+      
+      tempPath = shortPath;
+      tempPath.push_back(i);
+      g.visit(i);
+      pathQueue.push(tempPath);
     }
   }
+  
+  return false;
 }
 
 // Print instructions to the user.
@@ -171,7 +134,7 @@ int main()
    ifstream fin;
    string fileName;
    graph ourGraph; 
-   vector<int> recSolution, nonRecSolution(1, 0);
+   vector<int> depthSolution, breadthSolution;
 
    cout <<"Please enter the name of the maze file: ";
    cin >>fileName;
@@ -189,22 +152,25 @@ int main()
      // ourMaze.printMaze();
      ourMaze.mapMazeToGraph(ourGraph);
      
-     // Find a path recursively
-     cout <<"Recursive method: " <<endl;
-     if (!findPathDepth(ourGraph, ourMaze, 0, ourMaze.endId(), recSolution))
+     // Depth-first shortest path
+     cout <<"Depth-first shortest path: " <<endl;
+     if (!findPathDepth(ourGraph, ourMaze, 0, ourMaze.endId(), depthSolution))
      {
        cout <<"There are no solutions to the puzzle" <<endl;
      }
      else
      {
-       printResult(ourMaze, recSolution);
+       printResult(ourMaze, depthSolution);
        ourGraph.clearVisit();
      }
 
-     // Non-recursively
-     cout <<"Breadth method: " <<endl;
-     findPathBreadth(ourGraph, ourMaze, ourMaze.endId(), nonRecSolution);
-     printResult(ourMaze, nonRecSolution);
+     // Bread-first shortest path
+     cout <<"Breadth-first shortest path: " <<endl;
+     if (!findPathBreadth(ourGraph, ourMaze, ourMaze.endId(), breadthSolution))
+     {
+       cout <<"There are no solutions to the puzzle" <<endl;
+     }
+     printResult(ourMaze, breadthSolution);
      ourGraph.clearVisit();
    } 
 
