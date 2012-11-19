@@ -2,7 +2,8 @@
  * Zachary Berry and Patrick Willett
  * 11/12/12
  * Project 5b
- * This project will find the shortest solution to the map using dpeth-first and breadth-first
+ * This project will find the shortest solution to the map using 
+ * depth-first and breadth-first
  * search.
  */
 
@@ -12,17 +13,22 @@
 using namespace std;
 
 // Depth-first search find the shortest path
-bool findPathDepth(graph &g, maze &m, int begin, int end, vector<int> &sol)
+void findPathDepth(graph &g, int begin, int end, vector<int> &sol,
+		   vector<int> &tempSol)
 {
   g.visit(begin);
-  sol.push_back(begin);
-
-  m.printMaze(m.reverseMapIdI(begin), m.reverseMapIdJ(begin), 
-	      m.numRows() - 1, m.numCols() - 1);
+  tempSol.push_back(begin);
 
   if (begin == end)
   {
-    return true;
+    if(sol.size() > tempSol.size() && !sol.empty())
+    {
+      sol = tempSol;
+    }
+    else if(sol.empty())
+    {
+      sol = tempSol;
+    }
   }
 
   for (int i = 0; i <= end; i++)
@@ -31,21 +37,18 @@ bool findPathDepth(graph &g, maze &m, int begin, int end, vector<int> &sol)
     {
       continue;
     }
-    else if (findPathDepth(g, m, i, end, sol))
-    {
-      return true;
-    }
-    else
-    {
-      sol.pop_back();
-      g.unVisit(i);
-    }
+    findPathDepth(g, i, end, sol, tempSol);
+    tempSol.pop_back();
+    g.unVisit(i);
+    
   }
 
-  return false;
+  return;
 }
 
-bool findPathBreadth(graph &g, maze &m, int end, vector<int> &s)
+// findPathBreadth() will find the shortest path to the goal using breadth
+// first search.
+bool findPathBreadth(graph &g, int end, vector<int> &s)
 {
   queue< vector<int> > pathQueue;
   vector<int> shortPath, tempPath;
@@ -71,9 +74,6 @@ bool findPathBreadth(graph &g, maze &m, int end, vector<int> &s)
       {
 	continue;
       }
-
-      m.printMaze(m.reverseMapIdI(i), m.reverseMapIdJ(i), 
-		  m.numRows() - 1, m.numCols() - 1);
       
       tempPath = shortPath;
       tempPath.push_back(i);
@@ -100,6 +100,11 @@ void printResult(maze &m, vector<int> temp)
     i = m.reverseMapIdI(temp[x]);
     j = m.reverseMapIdJ(temp[x]);
     
+    if (x != 1 && x != temp.size() - 1)
+    {
+      cout <<"then ";
+    }
+
     if (prevI > i)
     {
       cout <<"move up";
@@ -117,16 +122,11 @@ void printResult(maze &m, vector<int> temp)
       cout <<"move to the right";
     }
 
-    if (x != temp.size() - 1)
-    {
-      cout <<", then ";
-    }
+    m.printMaze(i, j, m.numRows() - 1, m.numCols() - 1);
 
     prevI = i;
     prevJ = j;
   }
-
-  cout <<endl <<endl;
 } 
 
 int main()
@@ -134,7 +134,7 @@ int main()
    ifstream fin;
    string fileName;
    graph ourGraph; 
-   vector<int> depthSolution, breadthSolution;
+   vector<int> depthSolution, breadthSolution, tempDepth;
 
    cout <<"Please enter the name of the maze file: ";
    cin >>fileName;
@@ -149,28 +149,30 @@ int main()
    try
    {
      maze ourMaze(fin); 
-     // ourMaze.printMaze();
      ourMaze.mapMazeToGraph(ourGraph);
      
      // Depth-first shortest path
      cout <<"Depth-first shortest path: " <<endl;
-     if (!findPathDepth(ourGraph, ourMaze, 0, ourMaze.endId(), depthSolution))
+     findPathDepth(ourGraph, 0, ourMaze.endId(), depthSolution, tempDepth);
+     if (depthSolution.back() != ourMaze.endId())
      {
        cout <<"There are no solutions to the puzzle" <<endl;
      }
      else
      {
        printResult(ourMaze, depthSolution);
+       cout <<"Congratulations! The maze has been solved!" <<endl;
        ourGraph.clearVisit();
      }
 
      // Bread-first shortest path
      cout <<"Breadth-first shortest path: " <<endl;
-     if (!findPathBreadth(ourGraph, ourMaze, ourMaze.endId(), breadthSolution))
+     if (!findPathBreadth(ourGraph, ourMaze.endId(), breadthSolution))
      {
        cout <<"There are no solutions to the puzzle" <<endl;
      }
      printResult(ourMaze, breadthSolution);
+     cout <<"Congratulations! The maze has been solved!" <<endl;
      ourGraph.clearVisit();
    } 
 
