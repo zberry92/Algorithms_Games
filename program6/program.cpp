@@ -15,13 +15,33 @@ using namespace std;
 
 int const NONE = -1;  // Used to represent a node that does not exist
 
-// Create a graph sf that contains a spanning forest on the graph g.
+// Create a graph sf that contains a spanning forest of the graph g.
 void findSpanningForest(graph &g, graph &sf)
 {
+  for (int i = 0; i < g.numNodes(); i++)
+  {
+    if (g.allNodesVisited())
+    {
+      return;
+    }
+
+    g.visit(i);
+
+    for (int j = 0; j < g.numNodes(); j++)
+    {
+      if ((i == j) || g.isVisited(j) || !g.isEdge(i, j))
+      {
+	continue;
+      }
+      
+      sf.addEdge(i, j);
+      g.visit(j);
+    }
+  }
 }
 
 // Returns true if the graph g contains a cycle.  Otherwise, returns false.
-bool isCyclic(graph &g, int begin)
+bool isCyclic(graph &g, int begin = 0)
 {
   if (g.isVisited(begin))
   {
@@ -46,7 +66,7 @@ bool isCyclic(graph &g, int begin)
 }  
 
 // Returns true if the graph g is connected.  Otherwise returns false
-bool isConnected(graph &g, int begin)
+bool isConnected(graph &g, int begin = 0)
 {
   g.visit(begin);
 
@@ -72,9 +92,7 @@ bool isConnected(graph &g, int begin)
 
 int main()
 {
-   char x;
    ifstream fin;
-   stack <int> moves;
    string fileName;
    bool connected, cyclic;
 
@@ -94,9 +112,9 @@ int main()
 
       cout << g;
 
-      connected = isConnected(g, 0);
+      connected = isConnected(g);
       g.clearVisit();
-      cyclic = isCyclic(g, 0);
+      cyclic = isCyclic(g);
       g.clearVisit();
 
       if (connected)
@@ -122,9 +140,9 @@ int main()
 
       cout << "Spanning forest weight: " << sf.getTotalEdgeWeight()/2 << endl;
 
-      connected = isConnected(sf, 0);
+      connected = isConnected(sf);
       sf.clearVisit();
-      cyclic = isCyclic(sf, 0);
+      cyclic = isCyclic(sf);
       sf.clearVisit();
 
       if (connected)
