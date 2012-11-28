@@ -20,28 +20,30 @@ void findSpanningForest(graph &g, graph &sf)
 {
   for (int i = 0; i < g.numNodes(); i++)
   {
-    if (g.allNodesVisited())
+    if (g.allNodesMarked())
     {
+      g.clearMark();
       return;
     }
 
-    g.visit(i);
+    g.mark(i);
 
     for (int j = 0; j < g.numNodes(); j++)
     {
-      if ((i == j) || g.isVisited(j) || !g.isEdge(i, j))
+      if ((i == j) || g.isMarked(j) || !g.isEdge(i, j))
       {
 	continue;
       }
       
       sf.addEdge(i, j, g.getEdgeWeight(i, j));
-      g.visit(j);
+      sf.addEdge(j, i, g.getEdgeWeight(j, i));
+      g.mark(j);
     }
   }
 }
 
 // Returns true if the graph g contains a cycle.  Otherwise, returns false.
-bool isCyclic(graph &g, int begin = 0)
+bool isCyclic(graph &g, int begin = 0, int prevNode = 0)
 {
   if (g.isVisited(begin))
   {
@@ -52,11 +54,11 @@ bool isCyclic(graph &g, int begin = 0)
   
   for (int i = 0; i < g.numNodes(); i++)
   {
-    if ((i == begin) || !g.isEdge(begin, i))
+    if ((i == begin) || !g.isEdge(begin, i) || prevNode == i)
     {
       continue;
     }
-    if (isCyclic(g, i))
+    if (isCyclic(g, i, begin))
     {
       return true;
     }
@@ -110,7 +112,9 @@ int main()
       cout <<"Reading graph" <<endl;
       graph g(fin);
 
-      cout << g;
+      cout <<g;
+
+      g.clearVisit();
 
       connected = isConnected(g);
       g.clearVisit();
@@ -140,6 +144,7 @@ int main()
 
       cout <<"Spanning forest weight: " <<sf.getTotalEdgeWeight()/2 <<endl;
 
+      sf.clearVisit();
       connected = isConnected(sf);
       sf.clearVisit();
       cyclic = isCyclic(sf);
