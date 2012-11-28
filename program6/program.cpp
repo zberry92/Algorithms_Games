@@ -34,7 +34,7 @@ void findSpanningForest(graph &g, graph &sf)
 	continue;
       }
       
-      sf.addEdge(i, j);
+      sf.addEdge(i, j, g.getEdgeWeight(i, j));
       g.visit(j);
     }
   }
@@ -118,27 +118,27 @@ int main()
       g.clearVisit();
 
       if (connected)
-	 cout << "Graph is connected" << endl;
+	cout <<"Graph is connected" <<endl;
       else
-	 cout << "Graph is not connected" << endl;
+	cout <<"Graph is not connected" <<endl;
 
       if (cyclic)
-	 cout << "Graph contains a cycle" << endl;
+	cout <<"Graph contains a cycle" <<endl;
       else
-	 cout << "Graph does not contain a cycle" << endl;
+	cout <<"Graph does not contain a cycle" <<endl;
 
-      cout << endl;
-      cout << "Finding spanning forest" << endl;
+      cout <<endl;
+      cout <<"Finding spanning forest" <<endl;
 
       // Initialize an empty graph to contain the spanning forest
       graph sf(g.numNodes());
       findSpanningForest(g, sf);
 
-      cout << endl;
+      cout <<endl;
 
-      cout << sf;
+      cout <<sf;
 
-      cout << "Spanning forest weight: " << sf.getTotalEdgeWeight()/2 << endl;
+      cout <<"Spanning forest weight: " <<sf.getTotalEdgeWeight()/2 <<endl;
 
       connected = isConnected(sf);
       sf.clearVisit();
@@ -146,24 +146,24 @@ int main()
       sf.clearVisit();
 
       if (connected)
-	 cout << "Graph is connected" << endl;
+	 cout <<"Graph is connected" <<endl;
       else
-	 cout << "Graph is not connected" << endl;
+	 cout <<"Graph is not connected" <<endl;
 
       if (cyclic)
-	 cout << "Graph contains a cycle" << endl;
+	 cout <<"Graph contains a cycle" <<endl;
       else
-	 cout << "Graph does not contain a cycle" << endl;
+	 cout <<"Graph does not contain a cycle" <<endl;
 
-      cout << endl;
+      cout <<endl;
    }    
    catch (indexRangeError &ex) 
    { 
-      cout << ex.what() << endl; 
+      cout <<ex.what() <<endl; 
    }
    catch (rangeError &ex)
    {
-      cout << ex.what() << endl; 
+      cout <<ex.what() <<endl; 
    }
 }
 
