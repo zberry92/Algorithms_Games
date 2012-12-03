@@ -48,6 +48,7 @@ bool isCyclic(graph &g, int begin = 0, int prevNode = 0)
 {
   if (g.isVisited(begin))
   {
+    g.clearVisit();
     return true;
   }
 
@@ -112,7 +113,7 @@ void primMinimumSpanning(graph &g, graph &msf)
 
     for (int j = 0; j < g.numNodes(); j++)
     {
-      if ((i == j) || !g.isEdge(i, j) || g.isMarked(i, j) || g.isMarked(j))
+      if ((i == j) || !g.isEdge(i, j) || g.isMarked(i, j))
       {
 	continue;
       }
@@ -140,6 +141,12 @@ void primMinimumSpanning(graph &g, graph &msf)
       g.mark(i, tempJ);
       msf.addEdge(tempJ, i, minEdgeWeight);
       g.mark(tempJ, i);
+
+      if (isCyclic(msf))
+      {
+	msf.removeEdge(i, tempJ);
+	msf.removeEdge(tempJ, i);
+      }
     }
   }
 }
