@@ -1,9 +1,10 @@
 /*
  * Zachary Berry and Patrick Willet
  * 11/27/12
- * Project 6a
- * This project will create a spanning forest of a graph and check if the
- * graph is connected or cyclic.
+ * Project 6b
+ * This project will create a minimum spanning forest of a graph, check 
+ * if the graph is connected or cyclic and compare it to our original
+ * spanning tree.
  */
 
 #include <limits.h>
@@ -92,11 +93,63 @@ bool isConnected(graph &g, int begin = 0)
   return false;
 }
 
+// Uses prims algorithm to find a minimum spanning forest.
+void primMinimumSpanning(graph &g, graph &msf)
+{
+  int minEdgeWeight = 0, tempEdgeWeight = 0, tempJ;
+
+  for (int i = 0; i < g.numNodes(); i++)
+  {
+    if (g.allNodesMarked())
+    {
+      g.clearMark();
+      return;
+    }
+
+    g.mark(i);
+    tempJ = -1;
+    minEdgeWeight = 0;
+
+    for (int j = 0; j < g.numNodes(); j++)
+    {
+      if ((i == j) || !g.isEdge(i, j) || g.isMarked(i, j) || g.isMarked(j))
+      {
+	continue;
+      }
+
+      tempEdgeWeight = g.getEdgeWeight(i, j);
+
+      if (minEdgeWeight == 0)
+      {
+	minEdgeWeight = tempEdgeWeight;
+	tempJ = j;
+	continue;
+      }
+
+      if (minEdgeWeight > tempEdgeWeight)
+      {
+	minEdgeWeight = tempEdgeWeight;
+	tempJ = j;
+	continue;
+      }
+    }
+
+    if (tempJ != -1 && minEdgeWeight != 0)
+    {
+      msf.addEdge(i, tempJ, minEdgeWeight);
+      g.mark(i, tempJ);
+      msf.addEdge(tempJ, i, minEdgeWeight);
+      g.mark(tempJ, i);
+    }
+  }
+}
+
 int main()
 {
    ifstream fin;
    string fileName;
    bool connected, cyclic;
+   int sfCost, msfCost;
 
    cout <<"Enter filename: ";
    cin >>fileName;
@@ -142,7 +195,9 @@ int main()
 
       cout <<sf;
 
-      cout <<"Spanning forest weight: " <<sf.getTotalEdgeWeight()/2 <<endl;
+      sfCost = sf.getTotalEdgeWeight() / 2;
+
+      cout <<"Spanning forest weight: " <<sfCost <<endl;
 
       sf.clearVisit();
       connected = isConnected(sf);
@@ -161,6 +216,42 @@ int main()
 	 cout <<"Graph does not contain a cycle" <<endl;
 
       cout <<endl;
+
+// Initialize an empty graph to contain the minimum spanning forest
+      graph msf(g.numNodes());
+      primMinimumSpanning(g, msf);
+
+      cout <<endl;
+
+      cout <<msf;
+
+      msfCost = msf.getTotalEdgeWeight() / 2;
+
+      cout <<"Minimum Spanning forest weight: " <<msfCost <<endl;
+
+      msf.clearVisit();
+      connected = isConnected(msf);
+      msf.clearVisit();
+      cyclic = isCyclic(msf);
+      msf.clearVisit();
+
+      if (connected)
+	 cout <<"Graph is connected" <<endl;
+      else
+	 cout <<"Graph is not connected" <<endl;
+
+      if (cyclic)
+	 cout <<"Graph contains a cycle" <<endl;
+      else
+	 cout <<"Graph does not contain a cycle" <<endl;
+
+      cout <<endl;
+
+      cout <<"The total cost of the initial spanning forest was $" 
+	   <<sf.getTotalEdgeWeight()/2 <<endl
+	   <<"The total cost of our minimum spanning forest was $"
+	   <<msf.getTotalEdgeWeight()/2 <<endl
+	   <<"The total improved cost is $" <<(sfCost - msfCost) <<endl;
    }    
    catch (indexRangeError &ex) 
    { 
