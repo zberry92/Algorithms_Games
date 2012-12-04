@@ -94,61 +94,61 @@ bool isConnected(graph &g, int begin = 0)
   return false;
 }
 
-// Uses prims algorithm to find a minimum spanning forest.
-void primMinimumSpanning(graph &g, graph &msf)
+// primMinimumSpanning finds the minimum spanning forest. It will also count the number
+// of connected components. 
+void primMinimumSpanning(graph &g, graph &msf, int &connectedComp)
 {
-  int minEdgeWeight = 0, tempEdgeWeight = 0, tempJ;
+  vector<int> visitNode;
+  int tempEdgeWeight, minEdgeWeight, iterNode, 
+      tempNode = 0, numConnect = 1;
 
-  for (int i = 0; i < g.numNodes(); i++)
+  g.mark(0);
+  visitNode.push_back(0);
+
+  while (!g.allNodesMarked())
   {
-    if (g.allNodesMarked())
+    // If we have completed a connected segment, find the next unmarked node and start
+    // from there.
+    if (tempNode == -1) 
     {
-      g.clearMark();
-      return;
+      numConnect++;
+      visitNode = vector<int>(1, g.findUnmarkedNode());
     }
 
-    g.mark(i);
-    tempJ = -1;
     minEdgeWeight = 0;
+    tempNode = -1;
 
-    for (int j = 0; j < g.numNodes(); j++)
+    for (vector<int>::iterator iter = visitNode.begin(); iter < visitNode.end(); iter++)
     {
-      if ((i == j) || !g.isEdge(i, j) || g.isMarked(i, j))
+      for (int i = 0; i < g.numNodes(); i++)
       {
-	continue;
-      }
-
-      tempEdgeWeight = g.getEdgeWeight(i, j);
-
-      if (minEdgeWeight == 0)
-      {
-	minEdgeWeight = tempEdgeWeight;
-	tempJ = j;
-	continue;
-      }
-
-      if (minEdgeWeight > tempEdgeWeight)
-      {
-	minEdgeWeight = tempEdgeWeight;
-	tempJ = j;
-	continue;
+	if ((*iter == i) || g.isMarked(i) || !g.isEdge(*iter, i))
+	{
+	  continue;
+	}
+	
+	tempEdgeWeight = g.getEdgeWeight(*iter, i);
+	if (minEdgeWeight == 0 || minEdgeWeight > tempEdgeWeight)
+	{
+	  minEdgeWeight = tempEdgeWeight;
+	  iterNode = *iter;
+	  tempNode = i;
+	  continue;
+	}
       }
     }
 
-    if (tempJ != -1 && minEdgeWeight != 0)
+    if (tempNode != -1)
     {
-      msf.addEdge(i, tempJ, minEdgeWeight);
-      g.mark(i, tempJ);
-      msf.addEdge(tempJ, i, minEdgeWeight);
-      g.mark(tempJ, i);
-
-      if (isCyclic(msf))
-      {
-	msf.removeEdge(i, tempJ);
-	msf.removeEdge(tempJ, i);
-      }
+      g.mark(tempNode);
+      msf.addEdge(iterNode, tempNode, minEdgeWeight);
+      msf.addEdge(tempNode, iterNode, minEdgeWeight);
+      
+      visitNode.push_back(tempNode);
     }
   }
+
+  connectedComp = numConnect;
 }
 
 int main()
@@ -156,7 +156,7 @@ int main()
    ifstream fin;
    string fileName;
    bool connected, cyclic;
-   int sfCost, msfCost;
+   int sfCost, msfCost, msfConnectedComp;
 
    cout <<"Enter filename: ";
    cin >>fileName;
@@ -225,8 +225,10 @@ int main()
       cout <<endl;
 
 // Initialize an empty graph to contain the minimum spanning forest
+      cout <<"Finding the minimum spanning forest" <<endl;
+
       graph msf(g.numNodes());
-      primMinimumSpanning(g, msf);
+      primMinimumSpanning(g, msf, msfConnectedComp);
 
       cout <<endl;
 
@@ -253,6 +255,9 @@ int main()
 	 cout <<"Graph does not contain a cycle" <<endl;
 
       cout <<endl;
+
+      cout <<"The total number of connected components is: " 
+	   <<msfConnectedComp <<endl;
 
       cout <<"The total cost of the initial spanning forest was $" 
 	   <<sf.getTotalEdgeWeight()/2 <<endl

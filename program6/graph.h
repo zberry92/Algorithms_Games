@@ -411,6 +411,8 @@ class graph
    void clearVisit();
    bool allNodesVisited();
 
+   int findUnmarkedNode();
+
   private:
    matrix<edge> edges;
    vector<node> nodes;
@@ -891,4 +893,16 @@ bool graph::allNodesMarked()
 	 return false;
 
    return true;
+}
+
+// Returns an unmarked node
+int graph::findUnmarkedNode()
+{
+  for (int i = 0; i < numNodes(); i++)
+  {
+    if (!isMarked(i))
+    {
+      return i;
+    }
+  }
 }
