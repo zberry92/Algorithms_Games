@@ -179,7 +179,7 @@ void playFlip()
 	// SHuffle the deck three times.
 	for (int i = 0; i < 3; i++)
 	{
-		myDeck.shuffleDeck();
+	  	myDeck.shuffleDeck();
 	}
 
 	// Continue to play the game until the user enters a 0.
@@ -317,11 +317,12 @@ void deck::shuffleDeck()
 	{
 		// Readjust the front pointer.
 		moveNode = front;
-		prev = moveNode;
-		front = front->next;
+		prev = front;
 
 		// Find a random position in the list and move to it.
-		deckPosition = rand.random(deckSize);
+		deckPosition = rand.random(deckSize - 1);
+		if (deckPosition > 51)
+		  continue;
 
 		// 
 		for (int i = 0; i < deckPosition; i++)
@@ -329,10 +330,11 @@ void deck::shuffleDeck()
 			prev = prev->next;
 		}
 
-		if (moveNode != prev && prev != NULL)
+		if (moveNode != prev && prev != NULL && prev->next != NULL)
 		{
 			moveNode->next = prev->next;
 			prev->next = moveNode;
+			front = front->next;
 		}
 		// Any other case do not perform a move.
 		else
@@ -414,6 +416,5 @@ int main()
 		cerr <<re.what() <<endl;
 	}
 
-	system("pause");
 	return 0;
 }
